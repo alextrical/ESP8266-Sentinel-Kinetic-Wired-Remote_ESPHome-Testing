@@ -1,5 +1,5 @@
 substitutions:
-  backlight_delay: "1"  # Backlight odd delay in seconds
+  backlight_delay: "10"  # Backlight odd delay in seconds
   
 esphome:
   name: display-test
@@ -9,12 +9,8 @@ esphome:
     then:
       - lambda: |-
           id(boot_time) = millis();
-          // Send the 8-byte array over UART
-          id(uart_bus).write_array(id(alive_str), 8);
-      # - uart.write: !lambda |-
-      #     // std::string s = reinterpret_cast<const char*>(id(alive_str));
-      #     // return std::vector<unsigned char>( s.begin(), s.end() );
-      - delay: ${backlight_delay} s  # delay expects milliseconds
+          id(uart_bus).write_array(id(alive_str), 8); // Send the 8-byte array over UART
+      # - delay: ${backlight_delay} s  # delay in seconds
       - binary_sensor.template.publish:
           id: backlight
           state: OFF
@@ -29,11 +25,9 @@ uart:
   rx_pin: GPIO44
   baud_rate: 9600
 
-# Example configuration entry
 i2c:
   sda: 8
   scl: 9
-
 
 globals:
   - id: button_sum
@@ -49,6 +43,15 @@ globals:
     type: unsigned long
     restore_value: no
     initial_value: '0'
+  - id: line1
+    type: std::string
+    restore_value: no
+    initial_value: '"Normal AirfDUMMY"' #Dummy Data
+  - id: line2
+    type: std::string
+    restore_value: no
+    initial_value: '"25 %  Auto DUMMY "' #Dummy Data
+
 
 display:
   - platform: lcd_pcf8574
@@ -68,19 +71,9 @@ display:
         }
         it.print(0, 1, (base_string + dots).c_str());
       } else {
-        VentAxiaPacket();
-        it.print(0, 0, to_string(id(button_sum)).c_str());
-        
-        char str[30];
-        for (int i=0; i<8; i++) {
-          sprintf(str, "%X", id(va_out_buff)[i]); //Convert hex to string
-          if (id(va_out_buff)[i]<16) { 
-            it.print(i*2,1,"0");  // add leading "0" if needed
-            it.print(i*2+1,1,str);
-          } else {
-            it.print(i*2,1,str);
-          }
-        }
+        // Print to LCD
+        it.printf(0, 0, "%s", id(line1).c_str());
+        it.printf(0, 1, "%s", id(line2).c_str());
       }
 
 binary_sensor:
@@ -96,26 +89,18 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 2;'
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - globals.set:
           id: button_sum
           value: !lambda 'return (id(button_sum) >= 2) ? (id(button_sum) - 2) : 0;'
       - if:
           condition:
-            lambda: 'return id(button_sum) == 0;'
+            lambda: 'return id(button_sum) == 0;' #if no buttons being held, start countdown for turning off the backlight
           then:
             - binary_sensor.template.publish:
                 id: backlight
@@ -132,20 +117,12 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 1;'
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - globals.set:
           id: button_sum
           value: !lambda 'return (id(button_sum) >= 1) ? (id(button_sum) - 1) : 0;'
@@ -168,20 +145,12 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 8;'
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - globals.set:
           id: button_sum
           value: !lambda 'return (id(button_sum) >= 8) ? (id(button_sum) - 8) : 0;'
@@ -204,20 +173,12 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 4;'
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
-      - lambda: |-
-          VentAxiaSendKeyPress();
-      # - uart.write: !lambda |-
-      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
-      #     return std::vector<unsigned char>( s.begin(), s.end() );
+      - lambda: 'VentAxiaSendKeyPress();'
       - globals.set:
           id: button_sum
           value: !lambda 'return (id(button_sum) >= 4) ? (id(button_sum) - 4) : 0;'
