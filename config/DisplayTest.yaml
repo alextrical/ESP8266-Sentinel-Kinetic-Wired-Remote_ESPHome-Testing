@@ -60,7 +60,13 @@ display:
       if (millis() - id(boot_time) < 5000) {
         // Show splash screen for first 5 seconds
         it.print(0, 0, "VENT-AXIA Remote");
-        it.print(0, 1, "V1.0 ESP");
+        int elapsed_seconds = (millis() - id(boot_time)) / 625;
+        String base_string = "V1.0 ESP ";
+        String dots = "";
+        for (int i = 0; i < elapsed_seconds && i < 7; i++) {
+          dots += ".";
+        }
+        it.print(0, 1, (base_string + dots).c_str());
       } else {
         VentAxiaPacket();
         it.print(0, 0, to_string(id(button_sum)).c_str());
