@@ -3,10 +3,17 @@ substitutions:
   
 esphome:
   name: display-test
+  includes:
+    - custom_lambdas.h
   on_boot:
     then:
       - lambda: |-
           id(boot_time) = millis();
+          // Send the 8-byte array over UART
+          id(uart_bus).write_array(id(alive_str), 8);
+      # - uart.write: !lambda |-
+      #     // std::string s = reinterpret_cast<const char*>(id(alive_str));
+      #     // return std::vector<unsigned char>( s.begin(), s.end() );
       - delay: ${backlight_delay} s  # delay expects milliseconds
       - binary_sensor.template.publish:
           id: backlight
@@ -15,6 +22,12 @@ esphome:
 esp32:
   variant: esp32s3
   board: esp32-s3-devkitc-1
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO43
+  rx_pin: GPIO44
+  baud_rate: 9600
 
 # Example configuration entry
 i2c:
@@ -29,6 +42,9 @@ globals:
   - id: va_out_buff
     type: uint8_t[8]
     initial_value: '{0x04,0x05,0xAF,0xEF,0xFB,0x00,0x00,0x00}'
+  - id: alive_str
+    type: uint8_t[8]
+    initial_value: '{0x04,0x06,0xFF,0xFF,0xFF,0x10,0xFC,0xE8}'
   - id: boot_time
     type: unsigned long
     restore_value: no
@@ -46,20 +62,7 @@ display:
         it.print(0, 0, "VENT-AXIA Remote");
         it.print(0, 1, "V1.0 ESP");
       } else {
-        auto VentAxiaCrcCalc = [](uint8_t* buffer) -> uint16_t {
-            uint16_t crc = 0xFFFF;
-            for (int i = 0; i < 6; i++) {
-              crc -= buffer[i];
-            }
-            return crc;
-          return 0;
-        };
-
-        id(va_out_buff)[5] = id(button_sum);
-        uint16_t crc = VentAxiaCrcCalc(id(va_out_buff));
-        id(va_out_buff)[6] = crc >> 8;
-        id(va_out_buff)[7] = crc & 0xFF;
-
+        VentAxiaPacket();
         it.print(0, 0, to_string(id(button_sum)).c_str());
         
         char str[30];
@@ -87,13 +90,23 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 2;'
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - globals.set:
           id: button_sum
-          value: !lambda 'return id(button_sum) - 2;'
+          value: !lambda 'return (id(button_sum) >= 2) ? (id(button_sum) - 2) : 0;'
       - if:
           condition:
             lambda: 'return id(button_sum) == 0;'
@@ -113,13 +126,23 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 1;'
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - globals.set:
           id: button_sum
-          value: !lambda 'return id(button_sum) - 1;'
+          value: !lambda 'return (id(button_sum) >= 1) ? (id(button_sum) - 1) : 0;'
       - if:
           condition:
             lambda: 'return id(button_sum) == 0;'
@@ -139,13 +162,23 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 8;'
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - globals.set:
           id: button_sum
-          value: !lambda 'return id(button_sum) - 8;'
+          value: !lambda 'return (id(button_sum) >= 8) ? (id(button_sum) - 8) : 0;'
       - if:
           condition:
             lambda: 'return id(button_sum) == 0;'
@@ -165,13 +198,23 @@ binary_sensor:
       - globals.set:
           id: button_sum
           value: !lambda 'return id(button_sum) + 4;'
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - binary_sensor.template.publish:
           id: backlight
           state: ON
     on_release:
+      - lambda: |-
+          VentAxiaSendKeyPress();
+      # - uart.write: !lambda |-
+      #     std::string s = reinterpret_cast<const char*>(id(va_out_buff));
+      #     return std::vector<unsigned char>( s.begin(), s.end() );
       - globals.set:
           id: button_sum
-          value: !lambda 'return id(button_sum) - 4;'
+          value: !lambda 'return (id(button_sum) >= 4) ? (id(button_sum) - 4) : 0;'
       - if:
           condition:
             lambda: 'return id(button_sum) == 0;'
