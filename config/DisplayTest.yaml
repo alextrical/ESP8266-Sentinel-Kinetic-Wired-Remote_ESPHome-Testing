@@ -19,11 +19,17 @@ esp32:
   variant: esp32s3
   board: esp32-s3-devkitc-1
 
+external_components:
+  - source: components
+
 uart:
   id: uart_bus
   tx_pin: GPIO43
   rx_pin: GPIO44
   baud_rate: 9600
+
+ventaxiask_uart:
+  id: ventaxiask_uart_1
 
 i2c:
   sda: 8
@@ -60,7 +66,7 @@ display:
     address: 0x27
     update_interval: 100ms
     lambda: |-
-      if (millis() - id(boot_time) < 5000) {
+      if (millis() - id(boot_time) < 5/*000*/) {
         // Show splash screen for first 5 seconds
         it.print(0, 0, "VENT-AXIA Remote");
         int elapsed_seconds = (millis() - id(boot_time)) / 625;
