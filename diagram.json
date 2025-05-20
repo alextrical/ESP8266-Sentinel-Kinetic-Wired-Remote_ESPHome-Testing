@@ -62,8 +62,8 @@
     [ "esp:9", "lcd1:SCL", "gold", [ "h-19.25", "v-163.2" ] ],
     [ "lcd1:VCC", "esp:5V", "red", [ "h-201.6", "v240.1" ] ],
     [ "lcd1:GND", "esp:GND.1", "black", [ "h-211.2", "v259.2" ] ],
-    [ "chip2:TX", "esp:RX", "violet", [ "h-28.8", "v-28.8" ] ],
-    [ "esp:TX", "chip2:RX", "blue", [ "h38.4", "v76.8" ] ],
+    [ "chip2:TX", "esp:2", "violet", [ "h-28.8", "v-28.8" ] ],
+    [ "esp:1", "chip2:RX", "blue", [ "h38.4", "v76.8" ] ],
     [ "esp:0", "btn2:2.l", "#8f4814", [ "h201.6", "v19.2" ] ],
     [ "esp:14", "btn3:2.r", "white", [ "h-9.65", "v96", "h365" ] ],
     [ "esp:13", "btn4:2.r", "orange", [ "h-19.25", "v115.2", "h355.2", "v-153.6", "h-28.6" ] ],
@@ -81,5 +81,5 @@
     [ "sw4:2", "btn4:2.l", "gray", [ "v0" ] ],
     [ "sw4:3", "btn4:1.l", "black", [ "v0" ] ]
   ],
-  "dependencies": { "chip-uart": "github:alextrical/wokwi-VentAxiaSentinel-custom-chip@0.1.1" }
+  "dependencies": { "chip-uart": "github:alextrical/wokwi-VentAxiaSentinel-custom-chip@0.1.3" }
 }

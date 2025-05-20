@@ -10,7 +10,6 @@ esphome:
       - lambda: |-
           id(boot_time) = millis();
           id(uart_bus).write_array(id(alive_str), 8); // Send the 8-byte array over UART
-      # - delay: ${backlight_delay} s  # delay in seconds
       - binary_sensor.template.publish:
           id: backlight
           state: OFF
@@ -18,26 +17,41 @@ esphome:
 esp32:
   variant: esp32s3
   board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+logger:
+  deassert_rts_dtr: true
+  hardware_uart : UART0
+  level: DEBUG
+  logs:
+    component: ERROR
 
 uart:
   id: uart_bus
-  tx_pin: GPIO43
-  rx_pin: GPIO44
+  tx_pin: GPIO1
+  rx_pin: GPIO2
   baud_rate: 9600
+  # data_bits: 8
+  # parity: NONE
+  # stop_bits: 1
 
-# # External component for UART data processing
-# external_components:
-#   - source: github://eigger/espcomponents@latest
-#     components: [ uartex ]
-#     refresh: always
+# External component for UART data processing
+external_components:
+  - source: github://eigger/espcomponents@latest
+    components: [ uartex ]
+    refresh: always
 
-# uartex:
-#   rx_timeout: 100ms
-#   rx_header: [0x02, 0x01]
-
-i2c:
-  sda: 8
-  scl: 9
+uartex:
+  rx_timeout: 10ms
+  rx_header: [0x02, 0x00]
+  rx_checksum2: !lambda |-
+    uint16_t crc = 0xFFFF - 0x02;
+    for (int i = 0; i < len; i++)
+    {
+      crc -= data[i];
+    }
+    return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
 
 globals:
   - id: button_sum
@@ -53,15 +67,11 @@ globals:
     type: unsigned long
     restore_value: no
     initial_value: '0'
-  - id: line1
-    type: std::string
-    restore_value: no
-    initial_value: '"Normal AirfDUMMY"' #Dummy Data
-  - id: line2
-    type: std::string
-    restore_value: no
-    initial_value: '"25 %  Auto DUMMY "' #Dummy Data
 
+i2c:
+  sda: 8
+  scl: 9
+  scan: false
 
 display:
   - platform: lcd_pcf8574
@@ -70,21 +80,40 @@ display:
     address: 0x27
     update_interval: 100ms
     lambda: |-
-      if (millis() - id(boot_time) < 500/*0*/) {
+      if (millis() - id(boot_time) < 5000) {
         // Show splash screen for first 5 seconds
         it.print(0, 0, "VENT-AXIA Remote");
-        int elapsed_seconds = (millis() - id(boot_time)) / 625;
-        String base_string = "V1.0 ESP ";
-        String dots = "";
+        int elapsed_seconds = (millis() - id(boot_time)) / (5000/8);
+        std::string base_string = "V1.0 ESP ";
+        std::string dots = "";
         for (int i = 0; i < elapsed_seconds && i < 7; i++) {
           dots += ".";
         }
         it.print(0, 1, (base_string + dots).c_str());
-      } else {
-        // Print to LCD
-        it.printf(0, 0, "%s", id(line1).c_str());
-        it.printf(0, 1, "%s", id(line2).c_str());
+      } else { // Print to LCD
+        it.printf(0, 0, "%s", id(line1).state.c_str());
+        it.printf(0, 1, "%s", id(line2).state.c_str());
       }
+
+text_sensor:
+  - platform: uartex
+    name: "Line1"
+    id: "line1"
+    lambda: |-
+      std::string s;
+      for (int i = 4; i < 20; i++) {
+        s += static_cast<char>(data[i]);
+      }
+      return s.c_str();
+  - platform: uartex
+    name: "Line2"
+    id: "line2"
+    lambda: |-
+      std::string s;
+      for (int i = 21; i < 36; i++) {
+        s += static_cast<char>(data[i]);
+      }
+      return s.c_str();
 
 binary_sensor:
   - platform: gpio
