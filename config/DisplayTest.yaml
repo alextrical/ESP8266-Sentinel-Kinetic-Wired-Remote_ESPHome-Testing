@@ -3,13 +3,10 @@ substitutions:
   
 esphome:
   name: display-test
-  includes:
-    - custom_lambdas.h
   on_boot:
     then:
-      - lambda: |-
-          id(boot_time) = millis();
-          id(uart_bus).write_array(id(alive_str), 8); // Send the 8-byte array over UART
+      - switch.toggle: alive
+      - lambda: 'id(boot_time) = millis();'
       - binary_sensor.template.publish:
           id: backlight
           state: OFF
@@ -21,20 +18,18 @@ esp32:
     type: esp-idf
 
 logger:
-  deassert_rts_dtr: true
+  level: NONE #Dissable logs on UART
+  # deassert_rts_dtr: true
   hardware_uart : UART0
-  level: DEBUG
-  logs:
-    component: ERROR
+#   level: DEBUG
+#   logs:
+#     component: ERROR
 
 uart:
   id: uart_bus
   tx_pin: GPIO1
   rx_pin: GPIO2
   baud_rate: 9600
-  # data_bits: 8
-  # parity: NONE
-  # stop_bits: 1
 
 # External component for UART data processing
 external_components:
@@ -44,25 +39,21 @@ external_components:
 
 uartex:
   rx_timeout: 10ms
-  rx_header: [0x02, 0x00]
+  rx_header: [0x02, 0x00]  # Header included in checksum
   rx_checksum2: !lambda |-
     uint16_t crc = 0xFFFF - 0x02;
-    for (int i = 0; i < len; i++)
-    {
-      crc -= data[i];
-    }
-    return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
+    for (int i = 0; i < len; i++) crc -= data[i];
+    return { static_cast<uint8_t>(crc >> 8), static_cast<uint8_t>(crc) };
+  tx_delay: 10ms
+  tx_checksum2: !lambda |-
+    uint16_t crc = 0xFFFF;
+    for (int i = 0; i < len; i++) crc -= data[i];
+    return { static_cast<uint8_t>(crc >> 8), static_cast<uint8_t>(crc) };
 
 globals:
   - id: button_sum
     type: int
     initial_value: '0'
-  - id: va_out_buff
-    type: uint8_t[8]
-    initial_value: '{0x04,0x05,0xAF,0xEF,0xFB,0x00,0x00,0x00}'
-  - id: alive_str
-    type: uint8_t[8]
-    initial_value: '{0x04,0x06,0xFF,0xFF,0xFF,0x10,0xFC,0xE8}'
   - id: boot_time
     type: unsigned long
     restore_value: no
@@ -99,24 +90,16 @@ text_sensor:
   - platform: uartex
     name: "Line1"
     id: "line1"
-    lambda: |-
-      std::string s;
-      for (int i = 4; i < 20; i++) {
-        s += static_cast<char>(data[i]);
-      }
-      return s.c_str();
+    lambda: 'return std::string(reinterpret_cast<const char*>(data + 4), 16);'
   - platform: uartex
     name: "Line2"
     id: "line2"
-    lambda: |-
-      std::string s;
-      for (int i = 21; i < 36; i++) {
-        s += static_cast<char>(data[i]);
-      }
-      return s.c_str();
+    lambda: 'return std::string(reinterpret_cast<const char*>(data + 21), 16);'
 
 binary_sensor:
   - platform: gpio
+    filters:
+      - delayed_on_off: 10ms
     pin:
       number: 0
       mode:
@@ -125,26 +108,16 @@ binary_sensor:
       inverted: true
     name: "Up"
     on_press:
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return id(button_sum) + 2;'
-      - lambda: 'VentAxiaSendKeyPress();'
-      - binary_sensor.template.publish:
-          id: backlight
-          state: ON
+      then:
+        - lambda: 'id(button_sum) += 2;'
+        - switch.toggle: send
     on_release:
-      - lambda: 'VentAxiaSendKeyPress();'
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return (id(button_sum) >= 2) ? (id(button_sum) - 2) : 0;'
-      - if:
-          condition:
-            lambda: 'return id(button_sum) == 0;' #if no buttons being held, start countdown for turning off the backlight
-          then:
-            - binary_sensor.template.publish:
-                id: backlight
-                state: OFF
+      then:
+        - switch.toggle: send
+        - lambda: 'id(button_sum) = max(id(button_sum) - 2, 0);'  #Subtract 2 but never go below 0
   - platform: gpio
+    filters:
+      - delayed_on_off: 10ms
     pin:
       number: 12
       mode:
@@ -153,54 +126,16 @@ binary_sensor:
       inverted: true
     name: "Down"
     on_press:
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return id(button_sum) + 1;'
-      - lambda: 'VentAxiaSendKeyPress();'
-      - binary_sensor.template.publish:
-          id: backlight
-          state: ON
+      then:
+        - lambda: 'id(button_sum) += 1;'
+        - switch.toggle: send
     on_release:
-      - lambda: 'VentAxiaSendKeyPress();'
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return (id(button_sum) >= 1) ? (id(button_sum) - 1) : 0;'
-      - if:
-          condition:
-            lambda: 'return id(button_sum) == 0;'
-          then:
-            - binary_sensor.template.publish:
-                id: backlight
-                state: OFF
+      then:
+        - switch.toggle: send
+        - lambda: 'id(button_sum) = max(id(button_sum) - 1, 0);'  #Subtract 1 but never go below 0
   - platform: gpio
-    pin:
-      number: 13
-      mode:
-        input: true
-        pullup: true
-      inverted: true
-    name: "Main"
-    on_press:
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return id(button_sum) + 8;'
-      - lambda: 'VentAxiaSendKeyPress();'
-      - binary_sensor.template.publish:
-          id: backlight
-          state: ON
-    on_release:
-      - lambda: 'VentAxiaSendKeyPress();'
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return (id(button_sum) >= 8) ? (id(button_sum) - 8) : 0;'
-      - if:
-          condition:
-            lambda: 'return id(button_sum) == 0;'
-          then:
-            - binary_sensor.template.publish:
-                id: backlight
-                state: OFF
-  - platform: gpio
+    filters:
+      - delayed_on_off: 10ms
     pin:
       number: 14
       mode:
@@ -209,35 +144,62 @@ binary_sensor:
       inverted: true
     name: "Set"
     on_press:
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return id(button_sum) + 4;'
-      - lambda: 'VentAxiaSendKeyPress();'
-      - binary_sensor.template.publish:
-          id: backlight
-          state: ON
+      then:
+        - lambda: 'id(button_sum) += 4;'
+        - switch.toggle: send
     on_release:
-      - lambda: 'VentAxiaSendKeyPress();'
-      - globals.set:
-          id: button_sum
-          value: !lambda 'return (id(button_sum) >= 4) ? (id(button_sum) - 4) : 0;'
-      - if:
-          condition:
-            lambda: 'return id(button_sum) == 0;'
-          then:
-            - binary_sensor.template.publish:
-                id: backlight
-                state: OFF
+      then:
+        - switch.toggle: send
+        - lambda: 'id(button_sum) = max(id(button_sum) - 4, 0);'  #Subtract 4 but never go below 0
+  - platform: gpio
+    filters:
+      - delayed_on_off: 10ms
+    pin:
+      number: 13
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Main"
+    on_press:
+      then:
+        - lambda: 'id(button_sum) += 8;'
+        - switch.toggle: send
+    on_release:
+      then:
+        - switch.toggle: send
+        - lambda: 'id(button_sum) = max(id(button_sum) - 8, 0);'  #Subtract 8 but never go below 0
+
+            
+      # - binary_sensor.template.publish:
+      #     id: backlight
+      #     state: ON
+
+      # - if:
+      #     condition:
+      #       lambda: 'return id(button_sum) == 0;'
+      #     then:
+      #       - binary_sensor.template.publish:
+      #           id: backlight
+      #           state: OFF
 
   - platform: template
     id: backlight
     filters:
       - delayed_off: ${backlight_delay} s  # delay expects milliseconds
     on_press:
-      then:
-        - lambda: |-
-            id(lcd).backlight();
+      lambda: 'id(lcd).backlight();'
     on_release:
-      then:
-        - lambda: |-
-            id(lcd).no_backlight();
+      lambda: 'id(lcd).no_backlight();'
+
+switch:
+  - platform: uartex
+    id: send
+    command_on: !lambda |-
+      return {0x04, 0x05, 0xAF, 0xEF, 0xFB, id(button_sum)};
+    command_off: !lambda |-
+      return {0x04, 0x05, 0xAF, 0xEF, 0xFB, id(button_sum)};
+  - platform: uartex
+    id: alive
+    command_on: !lambda |-
+      return {0x04, 0x06, 0xFF, 0xFF, 0xFF, 0x10};

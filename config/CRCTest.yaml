@@ -16,7 +16,8 @@ logger:
 
 globals:
   - id: button_sum
-    type: unsigned char
+    type: unsigned char #int
+    restore_value: no
     initial_value: '0'
 
 uart:
@@ -45,9 +46,9 @@ uartex:
     }
     return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
   tx_delay: 50ms
-  tx_header: [0x04, 0x06, 0xFF, 0xFF, 0xFF]  # Header included in checksum
+  # tx_header: [0x04, 0x06, 0xFF, 0xFF, 0xFF]  # Header included in checksum
   tx_checksum2: !lambda |-
-    uint16_t crc = 0xFFFF - 0x04 - 0x06 - 0xFF - 0xFF - 0xFF;
+    uint16_t crc = 0xFFFF;
     for (int i = 0; i < len; i++)
     {
       crc -= data[i];
@@ -65,10 +66,14 @@ binary_sensor:
     name: "Up"
     on_press:
       then:
-        - switch.turn_on: up
+        - lambda: |-
+            id(button_sum) += 2;
+        - switch.toggle: send
     on_release:
       then:
-        - switch.turn_off: up
+        - switch.toggle: send
+        - lambda: |-
+            id(button_sum) = max(id(button_sum) - 2, 0);  //Subtract 2 but never go below 0
   - platform: gpio
     pin:
       number: 12
@@ -79,10 +84,14 @@ binary_sensor:
     name: "Down"
     on_press:
       then:
-        - switch.turn_on: down
+        - lambda: |-
+            id(button_sum) += 1;
+        - switch.toggle: send
     on_release:
       then:
-        - switch.turn_off: down
+        - switch.toggle: send
+        - lambda: |-
+            id(button_sum) = max(id(button_sum) - 1, 0);  //Subtract 1 but never go below 0
   - platform: gpio
     pin:
       number: 14
@@ -93,10 +102,14 @@ binary_sensor:
     name: "Set"
     on_press:
       then:
-        - switch.turn_on: set
+        - lambda: |-
+            id(button_sum) += 4;
+        - switch.toggle: send
     on_release:
       then:
-        - switch.turn_off: set
+        - switch.toggle: send
+        - lambda: |-
+            id(button_sum) = max(id(button_sum) - 4, 0);  //Subtract 4 but never go below 0
   - platform: gpio
     pin:
       number: 13
@@ -107,45 +120,23 @@ binary_sensor:
     name: "Main"
     on_press:
       then:
-        - switch.turn_on: mainb
+        - lambda: |-
+            id(button_sum) += 8;
+        - switch.toggle: send
     on_release:
       then:
-        - switch.turn_off: mainb
+        - switch.toggle: send
+        - lambda: |-
+            id(button_sum) = max(id(button_sum) - 8, 0);  //Subtract 8 but never go below 0
 
 switch:
   - platform: uartex
-    id: up
+    id: send
     command_on: !lambda |-
-      id(button_sum) = id(button_sum) + 2;
-      return {id(button_sum)};
+      return {0x04, 0x05, 0xAF, 0xEF, 0xFB, id(button_sum)};
     command_off: !lambda |-
-      unsigned char old = id(button_sum);
-      id(button_sum) = (id(button_sum) >= 2) ? (id(button_sum) - 2) : 0;
-      return {old};
+      return {0x04, 0x05, 0xAF, 0xEF, 0xFB, id(button_sum)};
   - platform: uartex
-    id: down
+    id: alive
     command_on: !lambda |-
-      id(button_sum) = id(button_sum) + 1;
-      return {id(button_sum)};
-    command_off: !lambda |-
-      unsigned char old = id(button_sum);
-      id(button_sum) = (id(button_sum) >= 1) ? (id(button_sum) - 1) : 0;
-      return {old};
-  - platform: uartex
-    id: set
-    command_on: !lambda |-
-      id(button_sum) = id(button_sum) + 4;
-      return {id(button_sum)};
-    command_off: !lambda |-
-      unsigned char old = id(button_sum);
-      id(button_sum) = (id(button_sum) >= 4) ? (id(button_sum) - 4) : 0;
-      return {old};
-  - platform: uartex
-    id: mainb
-    command_on: !lambda |-
-      id(button_sum) = id(button_sum) + 8;
-      return {id(button_sum)};
-    command_off: !lambda |-
-      unsigned char old = id(button_sum);
-      id(button_sum) = (id(button_sum) >= 8) ? (id(button_sum) - 8) : 0;
-      return {old};
+      return {0x04, 0x06, 0xFF, 0xFF, 0xFF, 0x10};
