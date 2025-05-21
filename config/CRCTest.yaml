@@ -1,0 +1,151 @@
+esphome:
+  name: display-test
+
+esp32:
+  variant: esp32s3
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+logger:
+  deassert_rts_dtr: true
+  hardware_uart : UART0
+  level: DEBUG
+  logs:
+    component: ERROR
+
+globals:
+  - id: button_sum
+    type: unsigned char
+    initial_value: '0'
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO1
+  rx_pin: GPIO2
+  baud_rate: 9600
+  # data_bits: 8
+  # parity: NONE
+  # stop_bits: 1
+
+# External component for UART data processing
+external_components:
+  - source: github://eigger/espcomponents@latest
+    components: [ uartex ]
+    refresh: always
+
+uartex:
+  rx_timeout: 10ms
+  rx_header: [0x02, 0x00]  # Header included in checksum
+  rx_checksum2: !lambda |-
+    uint16_t crc = 0xFFFF - 0x02;
+    for (int i = 0; i < len; i++)
+    {
+      crc -= data[i];
+    }
+    return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
+  tx_delay: 50ms
+  tx_header: [0x04, 0x06, 0xFF, 0xFF, 0xFF]  # Header included in checksum
+  tx_checksum2: !lambda |-
+    uint16_t crc = 0xFFFF - 0x04 - 0x06 - 0xFF - 0xFF - 0xFF;
+    for (int i = 0; i < len; i++)
+    {
+      crc -= data[i];
+    }
+    return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: 0
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Up"
+    on_press:
+      then:
+        - switch.turn_on: up
+    on_release:
+      then:
+        - switch.turn_off: up
+  - platform: gpio
+    pin:
+      number: 12
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Down"
+    on_press:
+      then:
+        - switch.turn_on: down
+    on_release:
+      then:
+        - switch.turn_off: down
+  - platform: gpio
+    pin:
+      number: 14
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Set"
+    on_press:
+      then:
+        - switch.turn_on: set
+    on_release:
+      then:
+        - switch.turn_off: set
+  - platform: gpio
+    pin:
+      number: 13
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Main"
+    on_press:
+      then:
+        - switch.turn_on: mainb
+    on_release:
+      then:
+        - switch.turn_off: mainb
+
+switch:
+  - platform: uartex
+    id: up
+    command_on: !lambda |-
+      id(button_sum) = id(button_sum) + 2;
+      return {id(button_sum)};
+    command_off: !lambda |-
+      unsigned char old = id(button_sum);
+      id(button_sum) = (id(button_sum) >= 2) ? (id(button_sum) - 2) : 0;
+      return {old};
+  - platform: uartex
+    id: down
+    command_on: !lambda |-
+      id(button_sum) = id(button_sum) + 1;
+      return {id(button_sum)};
+    command_off: !lambda |-
+      unsigned char old = id(button_sum);
+      id(button_sum) = (id(button_sum) >= 1) ? (id(button_sum) - 1) : 0;
+      return {old};
+  - platform: uartex
+    id: set
+    command_on: !lambda |-
+      id(button_sum) = id(button_sum) + 4;
+      return {id(button_sum)};
+    command_off: !lambda |-
+      unsigned char old = id(button_sum);
+      id(button_sum) = (id(button_sum) >= 4) ? (id(button_sum) - 4) : 0;
+      return {old};
+  - platform: uartex
+    id: mainb
+    command_on: !lambda |-
+      id(button_sum) = id(button_sum) + 8;
+      return {id(button_sum)};
+    command_off: !lambda |-
+      unsigned char old = id(button_sum);
+      id(button_sum) = (id(button_sum) >= 8) ? (id(button_sum) - 8) : 0;
+      return {old};
