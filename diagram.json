@@ -81,5 +81,5 @@
     [ "sw4:2", "btn4:2.l", "gray", [ "v0" ] ],
     [ "sw4:3", "btn4:1.l", "black", [ "v0" ] ]
   ],
-  "dependencies": { "chip-uart": "github:alextrical/wokwi-VentAxiaSentinel-custom-chip@0.1.3" }
+  "dependencies": { "chip-uart": "github:alextrical/wokwi-VentAxiaSentinel-custom-chip@0.1.5" }
 }
