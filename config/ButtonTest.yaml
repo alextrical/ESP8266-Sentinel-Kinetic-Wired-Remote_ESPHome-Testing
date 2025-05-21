@@ -1,15 +1,5 @@
-substitutions:
-  backlight_delay: "10"  # Backlight odd delay in seconds
-  
 esphome:
   name: display-test
-  on_boot:
-    then:
-      - switch.toggle: alive
-      - lambda: 'id(boot_time) = millis();'
-      - binary_sensor.template.publish:
-          id: backlight
-          state: OFF
 
 esp32:
   variant: esp32s3
@@ -18,7 +8,7 @@ esp32:
     type: esp-idf
 
 logger:
-  level: NONE #Dissable logs on UART
+  # level: NONE #Dissable logs on UART
   # deassert_rts_dtr: true
   hardware_uart : UART0
 #   level: DEBUG
@@ -44,44 +34,24 @@ uartex:
     uint16_t crc = 0xFFFF - 0x02;
     for (int i = 0; i < len; i++) crc -= data[i];
     return { static_cast<uint8_t>(crc >> 8), static_cast<uint8_t>(crc) };
-  tx_delay: 2ms
-  tx_checksum2: !lambda |-
-    uint16_t crc = 0xFFFF;
-    for (int i = 0; i < len; i++) crc -= data[i];
-    return { static_cast<uint8_t>(crc >> 8), static_cast<uint8_t>(crc) };
+  tx_delay: 10ms
 
-globals:
-  - id: boot_time
-    type: unsigned long
-    restore_value: no
-    initial_value: '0'
-
-i2c:
-  sda: 8
-  scl: 9
-  scan: false
-
-display:
-  - platform: lcd_pcf8574
-    id: lcd
-    dimensions: 16x2
-    address: 0x27
-    update_interval: 100ms
-    lambda: |-
-      if (millis() - id(boot_time) < 5000) {
-        // Show splash screen for first 5 seconds
-        it.print(0, 0, "VENT-AXIA Remote");
-        int elapsed_seconds = (millis() - id(boot_time)) / (5000/8);
-        std::string base_string = "V1 ESPHome ";
-        std::string dots = "";
-        for (int i = 0; i < elapsed_seconds && i < 6; i++) {
-          dots += ".";
-        }
-        it.print(0, 1, (base_string + dots).c_str());
-      } else { // Print to LCD
-        it.printf(0, 0, "%s", id(line1).state.c_str());
-        it.printf(0, 1, "%s", id(line2).state.c_str());
-      }
+# globals:
+#   - id: button_sum
+#     type: int
+#     initial_value: '0'
+#   - id: up
+#     type: int
+#     initial_value: '0'
+#   - id: down
+#     type: int
+#     initial_value: '0'
+#   - id: set
+#     type: int
+#     initial_value: '0'
+#   - id: M
+#     type: int
+#     initial_value: '0'
 
 interval:
   - interval: 26ms
@@ -91,24 +61,15 @@ interval:
             lambda: 'return id(bitfield_sensor).state > 0;'
           then:
             - switch.toggle: send
-            - binary_sensor.template.publish:
-                id: backlight
-                state: ON
-          else:
-            - binary_sensor.template.publish:
-                id: backlight
-                state: OFF
+          #   - binary_sensor.template.publish:
+          #       id: backlight
+          #       state: ON
+          # else:
+          #   - binary_sensor.template.publish:
+          #       id: backlight
+          #       state: OFF
 
-text_sensor:
-  - platform: uartex
-    name: "Line1"
-    id: "line1"
-    lambda: 'return std::string(reinterpret_cast<const char*>(data + 4), 16);'
-  - platform: uartex
-    name: "Line2"
-    id: "line2"
-    lambda: 'return std::string(reinterpret_cast<const char*>(data + 21), 16);'
-
+# 1. Define your 4 binary sensors (GPIO inputs)
 binary_sensor:
   - platform: gpio
     id: bit0
@@ -146,15 +107,8 @@ binary_sensor:
         pullup: true
       inverted: true
     name: "Bit 3 (MSB)"
-  - platform: template
-    id: backlight
-    filters:
-      - delayed_off: ${backlight_delay} s  # delay expects milliseconds
-    on_press:
-      lambda: 'id(lcd).backlight();'
-    on_release:
-      lambda: 'id(lcd).no_backlight();'
 
+# 2. Create a 4-bit value using binary_sensor_map
 sensor:
   - platform: binary_sensor_map
     id: bitfield_sensor
