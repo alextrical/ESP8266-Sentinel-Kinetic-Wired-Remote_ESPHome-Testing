@@ -39,7 +39,7 @@ external_components:
 
 uartex:
   rx_timeout: 10ms
-  rx_header: [0x02, 0x00]  # Header included in checksum
+  rx_header: [0x02]  # Header included in checksum
   rx_checksum2: !lambda |-
     uint16_t crc = 0xFFFF - 0x02;
     for (int i = 0; i < len; i++) crc -= data[i];
@@ -69,7 +69,7 @@ display:
     address: 0x27
     update_interval: 100ms
     lambda: |-
-      if (millis() - id(boot_time) < 5000) {
+     /* if (millis() - id(boot_time) < 5000) {
         // Show splash screen for first 5 seconds
         it.print(0, 0, "VENT-AXIA Remote");
         int elapsed_seconds = (millis() - id(boot_time)) / (5000/8);
@@ -79,10 +79,10 @@ display:
           dots += ".";
         }
         it.print(0, 1, (base_string + dots).c_str());
-      } else { // Print to LCD
+      } else { // Print to LCD */
         it.printf(0, 0, "%s", id(line1).state.c_str());
         it.printf(0, 1, "%s", id(line2).state.c_str());
-      }
+      //}
 
 interval:
   - interval: 26ms
@@ -104,11 +104,11 @@ text_sensor:
   - platform: uartex
     name: "Line1"
     id: "line1"
-    lambda: 'return std::string(reinterpret_cast<const char*>(data + 4), 16);'
+    lambda: 'return std::string(reinterpret_cast<const char*>(data + 5), 16);'
   - platform: uartex
     name: "Line2"
     id: "line2"
-    lambda: 'return std::string(reinterpret_cast<const char*>(data + 21), 16);'
+    lambda: 'return std::string(reinterpret_cast<const char*>(data + 22), 16);'
 
 binary_sensor:
   - platform: gpio
@@ -153,8 +153,8 @@ binary_sensor:
       - delayed_off: ${backlight_delay} s  # delay expects milliseconds
     on_press:
       lambda: 'id(lcd).backlight();'
-    on_release:
-      lambda: 'id(lcd).no_backlight();'
+    # on_release:
+    #   lambda: 'id(lcd).no_backlight();'
 
 sensor:
   - platform: binary_sensor_map
