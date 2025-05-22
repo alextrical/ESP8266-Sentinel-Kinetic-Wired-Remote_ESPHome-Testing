@@ -5,7 +5,7 @@ esphome:
   name: display-test
   on_boot:
     then:
-      - switch.toggle: alive
+      - button.press: alive
       - lambda: 'id(boot_time) = millis();'
       - binary_sensor.template.publish:
           id: backlight
@@ -91,7 +91,7 @@ interval:
           condition:
             lambda: 'return id(bitfield_sensor).state > 0;'
           then:
-            - switch.toggle: send
+            - button.press: send
             - binary_sensor.template.publish:
                 id: backlight
                 state: ON
@@ -104,11 +104,22 @@ text_sensor:
   - platform: uartex
     name: "Line1"
     id: "line1"
+    # lambda: 'return std::string(reinterpret_cast<const char*>(data + 5), 16);'
     lambda: 'return std::string(reinterpret_cast<const char*>(data + 5), 16);'
   - platform: uartex
     name: "Line2"
     id: "line2"
     lambda: 'return std::string(reinterpret_cast<const char*>(data + 22), 16);'
+  - platform: uartex
+    name: "Diagnostic 01"
+    lambda: |-
+      std::string payload(reinterpret_cast<const char*>(data + 5), 16);
+      if (payload.substr(0, 14) == "Diagnostic  01") {
+        return payload;
+      } else {
+        // Return an empty string (sensor will show as blank)
+        return {"KEEP"};
+      }
 
 binary_sensor:
   - platform: gpio
@@ -171,12 +182,10 @@ sensor:
       - binary_sensor: bit3
         value: 8  # 2^3
 
-switch:
+button:
   - platform: uartex
     id: send
     command_on: !lambda |-
-      return {0x04, 0x05, 0xAF, 0xEF, 0xFB, id(bitfield_sensor).state};
-    command_off: !lambda |-
       return {0x04, 0x05, 0xAF, 0xEF, 0xFB, id(bitfield_sensor).state};
   - platform: uartex
     id: alive
