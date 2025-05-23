@@ -31,7 +31,7 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_SWITCH("  ", "BluetoothSwitch", this->bluetooth_switch_);
 #endif
 #ifdef USE_BUTTON
-  LOG_BUTTON("  ", "DownButton", this->reset_button_);
+  LOG_BUTTON("  ", "ResetButton", this->reset_button_);
   LOG_BUTTON("  ", "RestartButton", this->restart_button_);
   LOG_BUTTON("  ", "QueryButton", this->query_button_);
 #endif
@@ -119,9 +119,7 @@ void VentAxiaSentinelKineticComponent::loop() {
 void VentAxiaSentinelKineticComponent::send_command_(uint8_t command, const uint8_t *command_value, int command_value_len) {
   ESP_LOGV(TAG, "Sending COMMAND %02X", command);
   // frame start bytes
-  //this->write_array(CMD_FRAME_HEADER, 4); //Disabled for debug
-  this->write_byte(lowbyte(0xFF));
-  this->write_byte(highbyte(0xFF));
+  this->write_array(CMD_FRAME_HEADER, 4);
   // length bytes
   int len = 2;
   if (command_value != nullptr)
@@ -140,9 +138,7 @@ void VentAxiaSentinelKineticComponent::send_command_(uint8_t command, const uint
     }
   }
   // frame end bytes
-  //this->write_array(CMD_FRAME_END, 4); //Disabled for debug
-  this->write_byte(lowbyte(0xFF));
-  this->write_byte(highbyte(0xFF));
+  this->write_array(CMD_FRAME_END, 4);
   // FIXME to remove
   delay(50);  // NOLINT
 }
@@ -508,31 +504,31 @@ void VentAxiaSentinelKineticComponent::readline_(int readch, uint8_t *buffer, in
 }
 
 void VentAxiaSentinelKineticComponent::set_config_mode_(bool enable) {
-  // uint8_t cmd = enable ? CMD_ENABLE_CONF : CMD_DISABLE_CONF;
-  // uint8_t cmd_value[2] = {0x01, 0x00};
-  // this->send_command_(cmd, enable ? cmd_value : nullptr, 2);
+  uint8_t cmd = enable ? CMD_ENABLE_CONF : CMD_DISABLE_CONF;
+  uint8_t cmd_value[2] = {0x01, 0x00};
+  this->send_command_(cmd, enable ? cmd_value : nullptr, 2);
 }
 
 void VentAxiaSentinelKineticComponent::set_bluetooth(bool enable) {
-  // this->set_config_mode_(true);
-  // uint8_t enable_cmd_value[2] = {0x01, 0x00};
-  // uint8_t disable_cmd_value[2] = {0x00, 0x00};
-  // this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
-  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+  this->set_config_mode_(true);
+  uint8_t enable_cmd_value[2] = {0x01, 0x00};
+  uint8_t disable_cmd_value[2] = {0x00, 0x00};
+  this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
+  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
 void VentAxiaSentinelKineticComponent::set_distance_resolution(const std::string &state) {
-  // this->set_config_mode_(true);
-  // uint8_t cmd_value[2] = {DISTANCE_RESOLUTION_ENUM_TO_INT.at(state), 0x00};
-  // this->send_command_(CMD_SET_DISTANCE_RESOLUTION, cmd_value, 2);
-  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+  this->set_config_mode_(true);
+  uint8_t cmd_value[2] = {DISTANCE_RESOLUTION_ENUM_TO_INT.at(state), 0x00};
+  this->send_command_(CMD_SET_DISTANCE_RESOLUTION, cmd_value, 2);
+  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
 void VentAxiaSentinelKineticComponent::set_baud_rate(const std::string &state) {
-  // this->set_config_mode_(true);
-  // uint8_t cmd_value[2] = {BAUD_RATE_ENUM_TO_INT.at(state), 0x00};
-  // this->send_command_(CMD_SET_BAUD_RATE, cmd_value, 2);
-  // this->set_timeout(200, [this]() { this->restart_(); });
+  this->set_config_mode_(true);
+  uint8_t cmd_value[2] = {BAUD_RATE_ENUM_TO_INT.at(state), 0x00};
+  this->send_command_(CMD_SET_BAUD_RATE, cmd_value, 2);
+  this->set_timeout(200, [this]() { this->restart_(); });
 }
 
 void VentAxiaSentinelKineticComponent::set_bluetooth_password(const std::string &password) {
@@ -541,37 +537,37 @@ void VentAxiaSentinelKineticComponent::set_bluetooth_password(const std::string 
     return;
   }
   this->set_config_mode_(true);
-  // uint8_t cmd_value[6];
-  // std::copy(password.begin(), password.end(), std::begin(cmd_value));
-  // this->send_command_(CMD_BT_PASSWORD, cmd_value, 6);
-  // this->set_config_mode_(false);
+  uint8_t cmd_value[6];
+  std::copy(password.begin(), password.end(), std::begin(cmd_value));
+  this->send_command_(CMD_BT_PASSWORD, cmd_value, 6);
+  this->set_config_mode_(false);
 }
 
 void VentAxiaSentinelKineticComponent::set_engineering_mode(bool enable) {
-  // this->set_config_mode_(true);
-  // last_engineering_mode_change_millis_ = millis();
-  // uint8_t cmd = enable ? CMD_ENABLE_ENG : CMD_DISABLE_ENG;
-  // this->send_command_(cmd, nullptr, 0);
-  // this->set_config_mode_(false);
+  this->set_config_mode_(true);
+  last_engineering_mode_change_millis_ = millis();
+  uint8_t cmd = enable ? CMD_ENABLE_ENG : CMD_DISABLE_ENG;
+  this->send_command_(cmd, nullptr, 0);
+  this->set_config_mode_(false);
 }
 
-void VentAxiaSentinelKineticComponent::down() {
-  // this->set_config_mode_(true);
-  // this->send_command_(CMD_RESET, nullptr, 0);
-  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+void VentAxiaSentinelKineticComponent::factory_reset() {
+  this->set_config_mode_(true);
+  this->send_command_(CMD_RESET, nullptr, 0);
+  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
-void VentAxiaSentinelKineticComponent::restart_() { /*this->send_command_(CMD_RESTART, nullptr, 0);*/ }
+void VentAxiaSentinelKineticComponent::restart_() { this->send_command_(CMD_RESTART, nullptr, 0); }
 
-void VentAxiaSentinelKineticComponent::query_parameters_() { /*this->send_command_(CMD_QUERY, nullptr, 0);*/ }
-void VentAxiaSentinelKineticComponent::get_version_() { /*this->send_command_(CMD_VERSION, nullptr, 0);*/ }
+void VentAxiaSentinelKineticComponent::query_parameters_() { this->send_command_(CMD_QUERY, nullptr, 0); }
+void VentAxiaSentinelKineticComponent::get_version_() { this->send_command_(CMD_VERSION, nullptr, 0); }
 void VentAxiaSentinelKineticComponent::get_mac_() {
-  // uint8_t cmd_value[2] = {0x01, 0x00};
-  // this->send_command_(CMD_MAC, cmd_value, 2);
+  uint8_t cmd_value[2] = {0x01, 0x00};
+  this->send_command_(CMD_MAC, cmd_value, 2);
 }
-void VentAxiaSentinelKineticComponent::get_distance_resolution_() { /*this->send_command_(CMD_QUERY_DISTANCE_RESOLUTION, nullptr, 0);*/ }
+void VentAxiaSentinelKineticComponent::get_distance_resolution_() { this->send_command_(CMD_QUERY_DISTANCE_RESOLUTION, nullptr, 0); }
 
-void VentAxiaSentinelKineticComponent::get_light_control_() { /*this->send_command_(CMD_QUERY_LIGHT_CONTROL, nullptr, 0);*/ }
+void VentAxiaSentinelKineticComponent::get_light_control_() { this->send_command_(CMD_QUERY_LIGHT_CONTROL, nullptr, 0); }
 
 #ifdef USE_NUMBER
 void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
@@ -601,7 +597,7 @@ void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
                        0x00,
                        0x00};
   this->set_config_mode_(true);
-  // this->send_command_(CMD_MAXDIST_DURATION, value, 18);
+  this->send_command_(CMD_MAXDIST_DURATION, value, 18);
   delay(50);  // NOLINT
   this->query_parameters_();
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
@@ -631,7 +627,7 @@ void VentAxiaSentinelKineticComponent::set_gate_threshold(uint8_t gate) {
   uint8_t value[18] = {0x00, 0x00, lowbyte(gate),   highbyte(gate),   0x00, 0x00,
                        0x01, 0x00, lowbyte(motion), highbyte(motion), 0x00, 0x00,
                        0x02, 0x00, lowbyte(still),  highbyte(still),  0x00, 0x00};
-  // this->send_command_(CMD_GATE_SENS, value, 18);
+  this->send_command_(CMD_GATE_SENS, value, 18);
   delay(50);  // NOLINT
   this->query_parameters_();
   this->set_config_mode_(false);
@@ -668,7 +664,7 @@ void VentAxiaSentinelKineticComponent::set_light_out_control() {
   uint8_t light_threshold = static_cast<uint8_t>(this->light_threshold_);
   uint8_t out_pin_level = OUT_PIN_LEVEL_ENUM_TO_INT.at(this->out_pin_level_);
   uint8_t value[4] = {light_function, light_threshold, out_pin_level, 0x00};
-  // this->send_command_(CMD_SET_LIGHT_CONTROL, value, 4);
+  this->send_command_(CMD_SET_LIGHT_CONTROL, value, 4);
   delay(50);  // NOLINT
   this->get_light_control_();
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });

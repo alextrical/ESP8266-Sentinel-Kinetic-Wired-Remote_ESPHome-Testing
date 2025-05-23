@@ -199,7 +199,7 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void set_bluetooth(bool enable);
   void set_distance_resolution(const std::string &state);
   void set_baud_rate(const std::string &state);
-  void down();
+  void factory_reset();
 
  protected:
   int two_byte_to_int_(char firstbyte, char secondbyte) { return (int16_t) (secondbyte << 8) + firstbyte; }
