@@ -6,12 +6,12 @@ from esphome.const import CONF_ID
 DEPENDENCIES = ["uart"]
 
 ventaxiask_uart_ns = cg.esphome_ns.namespace("ventaxiask_uart")
-VentAxiaSKUART = ventaxiask_uart_ns.class_(
-    "VentAxiaSKUART", cg.Component, uart.UARTDevice
+VentAxiaSKUARTComponent = ventaxiask_uart_ns.class_(
+    "VentAxiaSKUARTComponent", cg.Component, uart.UARTDevice
 )
 
 CONFIG_SCHEMA = (
-    cv.Schema({cv.GenerateID(): cv.declare_id(VentAxiaSKUART)})
+    cv.Schema({cv.GenerateID(): cv.declare_id(VentAxiaSKUARTComponent)})
     .extend(cv.COMPONENT_SCHEMA)
     .extend(uart.UART_DEVICE_SCHEMA)
 )
