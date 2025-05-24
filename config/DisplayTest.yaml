@@ -57,6 +57,8 @@ button:
     #   name: "Up Button"
     # down_button:
     #   name: "Down Button"
+    factory_reset:
+      name: "factory reset"
     restart:
       name: "restart"
     query_params:
