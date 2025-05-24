@@ -31,8 +31,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
 #endif
 #ifdef USE_BUTTON
   LOG_BUTTON("  ", "ResetButton", this->reset_button_);
-  LOG_BUTTON("  ", "RestartButton", this->restart_button_);
-  LOG_BUTTON("  ", "QueryButton", this->query_button_);
 #endif
 #ifdef USE_SENSOR
   LOG_SENSOR("  ", "LightSensor", this->light_sensor_);
@@ -65,12 +63,6 @@ void VentAxiaSentinelKineticComponent::read_all_info() {
 //   this->get_light_control_();
 //   this->query_parameters_();
 //   this->set_config_mode_(false);
-}
-
-void VentAxiaSentinelKineticComponent::restart_and_read_all_info() {
-  this->set_config_mode_(true);
-  this->restart_();
-  this->set_timeout(1000, [this]() { this->read_all_info(); });
 }
 
 void VentAxiaSentinelKineticComponent::loop() {
@@ -321,16 +313,14 @@ void VentAxiaSentinelKineticComponent::set_distance_resolution(const std::string
   this->set_config_mode_(true);
   uint8_t cmd_value[2] = {DISTANCE_RESOLUTION_ENUM_TO_INT.at(state), 0x00};
   this->send_command_(CMD_SET_DISTANCE_RESOLUTION, cmd_value, 2);
-  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
 void VentAxiaSentinelKineticComponent::factory_reset() {
   this->set_config_mode_(true);
   this->send_command_(CMD_RESET, nullptr, 0);
-  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
-
-void VentAxiaSentinelKineticComponent::restart_() { this->send_command_(CMD_RESTART, nullptr, 0); }
 
 void VentAxiaSentinelKineticComponent::query_parameters_() { this->send_command_(CMD_QUERY, nullptr, 0); }
 void VentAxiaSentinelKineticComponent::get_version_() { this->send_command_(CMD_VERSION, nullptr, 0); }
@@ -359,7 +349,7 @@ void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
   this->send_command_(CMD_MAXDIST_DURATION, value, 18);
   delay(50);  // NOLINT
   this->query_parameters_();
-  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
   this->set_config_mode_(false);
 }
 #endif

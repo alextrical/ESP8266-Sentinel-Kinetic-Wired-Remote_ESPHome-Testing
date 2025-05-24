@@ -47,7 +47,6 @@ static const uint16_t CMD_QUERY_LIGHT_CONTROL = 0x00AE;
 static const uint16_t CMD_SET_LIGHT_CONTROL = 0x00AD;
 static const uint16_t CMD_BT_PASSWORD = 0x00A9;
 static const uint16_t CMD_RESET = 0x00A2;
-static const uint16_t CMD_RESTART = 0x00A3;
 
 enum DistanceResolutionStructure : uint8_t { DISTANCE_RESOLUTION_0_2 = 0x01, DISTANCE_RESOLUTION_0_75 = 0x00 };
 
@@ -116,7 +115,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
 #ifdef USE_BUTTON
   SUB_BUTTON(reset)
-  SUB_BUTTON(restart)
   SUB_BUTTON(query)
 #endif
 #ifdef USE_NUMBER
@@ -138,7 +136,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
   void set_throttle(uint16_t value) { this->throttle_ = value; };
   void read_all_info();
-  void restart_and_read_all_info();
   void set_up(bool enable);
   void set_down(bool enable);
   void set_set(bool enable);
@@ -157,7 +154,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void get_version_();
   void get_distance_resolution_();
   void get_light_control_();
-  void restart_();
 
   int32_t last_periodic_millis_ = millis();
   uint16_t throttle_;
