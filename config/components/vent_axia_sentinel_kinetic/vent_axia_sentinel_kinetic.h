@@ -48,7 +48,6 @@ static const uint16_t CMD_QUERY_LIGHT_CONTROL = 0x00AE;
 static const uint16_t CMD_SET_LIGHT_CONTROL = 0x00AD;
 static const uint16_t CMD_SET_BAUD_RATE = 0x00A1;
 static const uint16_t CMD_BT_PASSWORD = 0x00A9;
-static const uint16_t CMD_MAC = 0x00A5;
 static const uint16_t CMD_RESET = 0x00A2;
 static const uint16_t CMD_RESTART = 0x00A3;
 static const uint16_t CMD_BLUETOOTH = 0x00A4;
@@ -75,25 +74,6 @@ static const std::map<std::string, uint8_t> DISTANCE_RESOLUTION_ENUM_TO_INT{{"0.
                                                                             {"0.75m", DISTANCE_RESOLUTION_0_75}};
 static const std::map<uint8_t, std::string> DISTANCE_RESOLUTION_INT_TO_ENUM{{DISTANCE_RESOLUTION_0_2, "0.2m"},
                                                                             {DISTANCE_RESOLUTION_0_75, "0.75m"}};
-
-enum LightFunctionStructure : uint8_t {
-  LIGHT_FUNCTION_OFF = 0x00,
-  LIGHT_FUNCTION_BELOW = 0x01,
-  LIGHT_FUNCTION_ABOVE = 0x02
-};
-
-static const std::map<std::string, uint8_t> LIGHT_FUNCTION_ENUM_TO_INT{
-    {"off", LIGHT_FUNCTION_OFF}, {"below", LIGHT_FUNCTION_BELOW}, {"above", LIGHT_FUNCTION_ABOVE}};
-static const std::map<uint8_t, std::string> LIGHT_FUNCTION_INT_TO_ENUM{
-    {LIGHT_FUNCTION_OFF, "off"}, {LIGHT_FUNCTION_BELOW, "below"}, {LIGHT_FUNCTION_ABOVE, "above"}};
-
-enum OutPinLevelStructure : uint8_t { OUT_PIN_LEVEL_LOW = 0x00, OUT_PIN_LEVEL_HIGH = 0x01 };
-
-static const std::map<std::string, uint8_t> OUT_PIN_LEVEL_ENUM_TO_INT{{"low", OUT_PIN_LEVEL_LOW},
-                                                                      {"high", OUT_PIN_LEVEL_HIGH}};
-static const std::map<uint8_t, std::string> OUT_PIN_LEVEL_INT_TO_ENUM{{OUT_PIN_LEVEL_LOW, "low"},
-                                                                      {OUT_PIN_LEVEL_HIGH, "high"}};
-
 // Commands values
 static const uint16_t CMD_MAX_MOVE_VALUE = 0x0000;
 static const uint16_t CMD_MAX_STILL_VALUE = 0x0001;
@@ -140,17 +120,12 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
 #ifdef USE_BINARY_SENSOR
   SUB_BINARY_SENSOR(target)
-  SUB_BINARY_SENSOR(moving_target)
-  SUB_BINARY_SENSOR(still_target)
-  SUB_BINARY_SENSOR(out_pin_presence_status)
 #endif
 #ifdef USE_TEXT_SENSOR
   SUB_TEXT_SENSOR(version)
 #endif
 #ifdef USE_SELECT
   SUB_SELECT(distance_resolution)
-  SUB_SELECT(light_function)
-  SUB_SELECT(out_pin_level)
 #endif
 #ifdef USE_SWITCH
   SUB_SWITCH(bluetooth)
@@ -194,7 +169,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void readline_(int readch, uint8_t *buffer, int len);
   void query_parameters_();
   void get_version_();
-  void get_mac_();
   void get_distance_resolution_();
   void get_light_control_();
   void restart_();
@@ -202,9 +176,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   int32_t last_periodic_millis_ = millis();
   uint16_t throttle_;
   std::string version_;
-  std::string mac_;
-  std::string out_pin_level_;
-  std::string light_function_;
 };
 
 }  // namespace vent_axia_sentinel_kinetic

@@ -22,9 +22,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "VentAxiaSentinelKinetic:");
 #ifdef USE_BINARY_SENSOR
   LOG_BINARY_SENSOR("  ", "TargetBinarySensor", this->target_binary_sensor_);
-  LOG_BINARY_SENSOR("  ", "MovingTargetBinarySensor", this->moving_target_binary_sensor_);
-  LOG_BINARY_SENSOR("  ", "StillTargetBinarySensor", this->still_target_binary_sensor_);
-  LOG_BINARY_SENSOR("  ", "OutPinPresenceStatusBinarySensor", this->out_pin_presence_status_binary_sensor_);
 #endif
 #ifdef USE_SWITCH
   LOG_SWITCH("  ", "BluetoothSwitch", this->bluetooth_switch_);
@@ -41,8 +38,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_TEXT_SENSOR("  ", "VersionTextSensor", this->version_text_sensor_);
 #endif
 #ifdef USE_SELECT
-  LOG_SELECT("  ", "LightFunctionSelect", this->light_function_select_);
-  LOG_SELECT("  ", "OutPinLevelSelect", this->out_pin_level_select_);
   LOG_SELECT("  ", "DistanceResolutionSelect", this->distance_resolution_select_);
 #endif
 #ifdef USE_NUMBER
@@ -63,7 +58,6 @@ void VentAxiaSentinelKineticComponent::setup() {
 void VentAxiaSentinelKineticComponent::read_all_info() {
 // this->set_config_mode_(true);
   this->get_version_();
-//   this->get_mac_();
 //   this->get_distance_resolution_();
 //   this->get_light_control_();
 //   this->query_parameters_();
@@ -154,11 +148,6 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
     this->light_sensor_->publish_state(NAN);
   }
 #endif
-#ifdef USE_BINARY_SENSOR
-  if (this->out_pin_presence_status_binary_sensor_ != nullptr) {
-    this->out_pin_presence_status_binary_sensor_->publish_state(false);
-  }
-#endif
 }
 
 const char VERSION_FMT[] = "%u.%02X.%02X%02X%02X%02X";
@@ -173,26 +162,6 @@ std::string format_version(uint8_t *buffer) {
   } while (version_size + 1 > version.size());
   version.resize(version_size);
   return version;
-}
-
-const char MAC_FMT[] = "%02X:%02X:%02X:%02X:%02X:%02X";
-
-const std::string UNKNOWN_MAC("unknown");
-const std::string NO_MAC("08:05:04:03:02:01");
-
-std::string format_mac(uint8_t *buffer) {
-  std::string::size_type mac_size = 256;
-  std::string mac;
-  do {
-    mac.resize(mac_size + 1);
-    mac_size = std::snprintf(&mac[0], mac.size(), MAC_FMT, buffer[10], buffer[11], buffer[12], buffer[13], buffer[14],
-                             buffer[15]);
-  } while (mac_size + 1 > mac.size());
-  mac.resize(mac_size);
-  if (mac == NO_MAC) {
-    return UNKNOWN_MAC;
-  }
-  return mac;
 }
 
 #ifdef USE_NUMBER
@@ -252,31 +221,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
       }
 #endif
     } break;
-    case lowbyte(CMD_QUERY_LIGHT_CONTROL): {
-      this->light_function_ = LIGHT_FUNCTION_INT_TO_ENUM.at(buffer[10]);
-      this->out_pin_level_ = OUT_PIN_LEVEL_INT_TO_ENUM.at(buffer[12]);
-      ESP_LOGV(TAG, "Out pin level is: %s", const_cast<char *>(this->out_pin_level_.c_str()));
-#ifdef USE_SELECT
-      if (this->light_function_select_ != nullptr && this->light_function_select_->state != this->light_function_) {
-        this->light_function_select_->publish_state(this->light_function_);
-      }
-      if (this->out_pin_level_select_ != nullptr && this->out_pin_level_select_->state != this->out_pin_level_) {
-        this->out_pin_level_select_->publish_state(this->out_pin_level_);
-      }
-#endif
-    } break;
-    case lowbyte(CMD_MAC):
-      if (len < 20) {
-        return false;
-      }
-      this->mac_ = format_mac(buffer);
-      ESP_LOGV(TAG, "MAC Address is: %s", const_cast<char *>(this->mac_.c_str()));
-#ifdef USE_SWITCH
-      if (this->bluetooth_switch_ != nullptr) {
-        this->bluetooth_switch_->publish_state(this->mac_ != UNKNOWN_MAC);
-      }
-#endif
-      break;
     case lowbyte(CMD_GATE_SENS):
       ESP_LOGV(TAG, "Handled sensitivity command");
       break;
@@ -385,10 +329,6 @@ void VentAxiaSentinelKineticComponent::restart_() { this->send_command_(CMD_REST
 
 void VentAxiaSentinelKineticComponent::query_parameters_() { this->send_command_(CMD_QUERY, nullptr, 0); }
 void VentAxiaSentinelKineticComponent::get_version_() { this->send_command_(CMD_VERSION, nullptr, 0); }
-void VentAxiaSentinelKineticComponent::get_mac_() {
-  uint8_t cmd_value[2] = {0x01, 0x00};
-  this->send_command_(CMD_MAC, cmd_value, 2);
-}
 void VentAxiaSentinelKineticComponent::get_distance_resolution_() { this->send_command_(CMD_QUERY_DISTANCE_RESOLUTION, nullptr, 0); }
 
 void VentAxiaSentinelKineticComponent::get_light_control_() { this->send_command_(CMD_QUERY_LIGHT_CONTROL, nullptr, 0); }

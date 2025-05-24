@@ -13,8 +13,6 @@ from .. import CONF_VentAxiaSentinelKinetic_ID, VentAxiaSentinelKineticComponent
 DistanceResolutionSelect = vent_axia_sentinel_kinetic_ns.class_("DistanceResolutionSelect", select.Select)
 
 CONF_DISTANCE_RESOLUTION = "distance_resolution"
-CONF_LIGHT_FUNCTION = "light_function"
-CONF_OUT_PIN_LEVEL = "out_pin_level"
 
 
 CONFIG_SCHEMA = {
@@ -35,7 +33,3 @@ async def to_code(config):
         )
         await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])
         cg.add(vent_axia_sentinel_kinetic_component.set_distance_resolution_select(s))
-    if out_pin_level_config := config.get(CONF_OUT_PIN_LEVEL):
-        s = await select.new_select(out_pin_level_config, options=["low", "high"])
-        await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_out_pin_level_select(s))

@@ -29,12 +29,6 @@ binary_sensor:
   - platform: vent_axia_sentinel_kinetic
     has_target:
       name: Presence
-    has_moving_target:
-      name: Moving Target
-    has_still_target:
-      name: Still Target
-    out_pin_presence_status:
-      name: out pin presence status
 
 sensor:
   - platform: vent_axia_sentinel_kinetic
