@@ -19,7 +19,7 @@ class VentAxiaSentinelKineticComponent : public uart::UARTDevice, public Compone
     void dump_config() override;
 
   protected:
-    void send_command_(const uint8_t *command_value, int command_value_len, uint8_t command_str);
+    void send_command_(const uint16_t *command_value, int command_value_len, uint8_t command_str);
     void send_alive_str_();
 };
 

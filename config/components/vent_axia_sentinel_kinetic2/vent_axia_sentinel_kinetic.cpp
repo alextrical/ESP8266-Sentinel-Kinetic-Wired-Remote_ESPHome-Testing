@@ -30,7 +30,7 @@ void VentAxiaSentinelKineticComponent::dump_config(){
 
 void VentAxiaSentinelKineticComponent::send_alive_str_() { this->send_command_(CMD_ALIVE_HEADER, 4, CMD_ALIVE_DATA); }
 
-void VentAxiaSentinelKineticComponent::send_command_(const uint8_t *command_value, int command_value_len, uint8_t command) {
+void VentAxiaSentinelKineticComponent::send_command_(const uint16_t *command_value, int command_value_len, uint8_t command) {
   ESP_LOGV(TAG, "Sending COMMAND %02X", command);
 
   // frame start bytes

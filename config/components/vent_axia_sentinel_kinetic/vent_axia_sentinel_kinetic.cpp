@@ -109,7 +109,7 @@ void VentAxiaSentinelKineticComponent::loop() {
   }
 }
 
-void VentAxiaSentinelKineticComponent::send_command_(uint8_t command, const uint8_t *command_value, int command_value_len) {
+void VentAxiaSentinelKineticComponent::send_command_(uint16_t command, const uint8_t *command_value, int command_value_len) {
   ESP_LOGV(TAG, "Sending COMMAND %02X", command);
   // frame start bytes
   this->write_array(CMD_FRAME_HEADER, 5);
@@ -194,11 +194,6 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
     int new_still_target_distance = this->two_byte_to_int_(buffer[STILL_TARGET_LOW], buffer[STILL_TARGET_HIGH]);
     if (this->still_target_distance_sensor_->get_state() != new_still_target_distance)
       this->still_target_distance_sensor_->publish_state(new_still_target_distance);
-  }
-  if (this->still_target_energy_sensor_ != nullptr) {
-    int new_still_target_energy = buffer[STILL_ENERGY];
-    if (this->still_target_energy_sensor_->get_state() != new_still_target_energy)
-      this->still_target_energy_sensor_->publish_state(new_still_target_energy);
   }
   if (this->detection_distance_sensor_ != nullptr) {
     int new_detect_distance = this->two_byte_to_int_(buffer[DETECT_DISTANCE_LOW], buffer[DETECT_DISTANCE_HIGH]);

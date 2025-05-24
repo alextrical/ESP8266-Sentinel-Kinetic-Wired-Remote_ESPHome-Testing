@@ -34,24 +34,24 @@ namespace vent_axia_sentinel_kinetic {
 #define CHECK_BIT(var, pos) (((var) >> (pos)) & 1)
 
 // Commands
-static const uint8_t CMD_ENABLE_CONF = 0x00FF;
-static const uint8_t CMD_DISABLE_CONF = 0x00FE;
-static const uint8_t CMD_ENABLE_ENG = 0x0062;
-static const uint8_t CMD_DISABLE_ENG = 0x0063;
-static const uint8_t CMD_MAXDIST_DURATION = 0x0060;
-static const uint8_t CMD_QUERY = 0x0061;
-static const uint8_t CMD_GATE_SENS = 0x0064;
-static const uint8_t CMD_VERSION = 0x1234;
-static const uint8_t CMD_QUERY_DISTANCE_RESOLUTION = 0x00AB;
-static const uint8_t CMD_SET_DISTANCE_RESOLUTION = 0x00AA;
-static const uint8_t CMD_QUERY_LIGHT_CONTROL = 0x00AE;
-static const uint8_t CMD_SET_LIGHT_CONTROL = 0x00AD;
-static const uint8_t CMD_SET_BAUD_RATE = 0x00A1;
-static const uint8_t CMD_BT_PASSWORD = 0x00A9;
-static const uint8_t CMD_MAC = 0x00A5;
-static const uint8_t CMD_RESET = 0x00A2;
-static const uint8_t CMD_RESTART = 0x00A3;
-static const uint8_t CMD_BLUETOOTH = 0x00A4;
+static const uint16_t CMD_ENABLE_CONF = 0x00FF;
+static const uint16_t CMD_DISABLE_CONF = 0x00FE;
+static const uint16_t CMD_ENABLE_ENG = 0x0062;
+static const uint16_t CMD_DISABLE_ENG = 0x0063;
+static const uint16_t CMD_MAXDIST_DURATION = 0x0060;
+static const uint16_t CMD_QUERY = 0x0061;
+static const uint16_t CMD_GATE_SENS = 0x0064;
+static const uint16_t CMD_VERSION = 0x1234;
+static const uint16_t CMD_QUERY_DISTANCE_RESOLUTION = 0x00AB;
+static const uint16_t CMD_SET_DISTANCE_RESOLUTION = 0x00AA;
+static const uint16_t CMD_QUERY_LIGHT_CONTROL = 0x00AE;
+static const uint16_t CMD_SET_LIGHT_CONTROL = 0x00AD;
+static const uint16_t CMD_SET_BAUD_RATE = 0x00A1;
+static const uint16_t CMD_BT_PASSWORD = 0x00A9;
+static const uint16_t CMD_MAC = 0x00A5;
+static const uint16_t CMD_RESET = 0x00A2;
+static const uint16_t CMD_RESTART = 0x00A3;
+static const uint16_t CMD_BLUETOOTH = 0x00A4;
 
 enum BaudRateStructure : uint8_t {
   BAUD_RATE_9600 = 1,
@@ -95,9 +95,9 @@ static const std::map<uint8_t, std::string> OUT_PIN_LEVEL_INT_TO_ENUM{{OUT_PIN_L
                                                                       {OUT_PIN_LEVEL_HIGH, "high"}};
 
 // Commands values
-static const uint8_t CMD_MAX_MOVE_VALUE = 0x0000;
-static const uint8_t CMD_MAX_STILL_VALUE = 0x0001;
-static const uint8_t CMD_DURATION_VALUE = 0x0002;
+static const uint16_t CMD_MAX_MOVE_VALUE = 0x0000;
+static const uint16_t CMD_MAX_STILL_VALUE = 0x0001;
+static const uint16_t CMD_DURATION_VALUE = 0x0002;
 // Command Header & Footer
 // static const uint8_t CMD_FRAME_HEADER[4] = {0xFD, 0xFC, 0xFB, 0xFA};
 // static const uint8_t CMD_FRAME_END[4] = {0x04, 0x03, 0x02, 0x01};
@@ -123,7 +123,6 @@ enum PeriodicDataStructure : uint8_t {
   MOVING_ENERGY = 11,
   STILL_TARGET_LOW = 12,
   STILL_TARGET_HIGH = 13,
-  STILL_ENERGY = 14,
   DETECT_DISTANCE_LOW = 15,
   DETECT_DISTANCE_HIGH = 16,
   MOVING_SENSOR_START = 19,
@@ -201,7 +200,7 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 
  protected:
   int two_byte_to_int_(char firstbyte, char secondbyte) { return (int16_t) (secondbyte << 8) + firstbyte; }
-  void send_command_(uint8_t command_str, const uint8_t *command_value, int command_value_len);
+  void send_command_(uint16_t command_str, const uint8_t *command_value, int command_value_len);
   void set_config_mode_(bool enable);
   void handle_periodic_data_(uint8_t *buffer, int len);
   bool handle_ack_data_(uint8_t *buffer, int len);
