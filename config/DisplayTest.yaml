@@ -41,6 +41,12 @@ switch:
       name: "control bluetooth"
     up:
       name: "control up"
+    down:
+      name: "control down"
+    set:
+      name: "control set"
+    main:
+      name: "control main"
 
 number:
   - platform: vent_axia_sentinel_kinetic

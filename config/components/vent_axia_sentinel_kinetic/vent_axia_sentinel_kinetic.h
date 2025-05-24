@@ -112,6 +112,9 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #ifdef USE_SWITCH
   SUB_SWITCH(bluetooth)
   SUB_SWITCH(up)
+  SUB_SWITCH(down)
+  SUB_SWITCH(set)
+  SUB_SWITCH(main)
 #endif
 #ifdef USE_BUTTON
   SUB_BUTTON(reset)
@@ -141,6 +144,9 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void restart_and_read_all_info();
   void set_bluetooth(bool enable);
   void set_up(bool enable);
+  void set_down(bool enable);
+  void set_set(bool enable);
+  void set_main(bool enable);
   void set_distance_resolution(const std::string &state);
   void factory_reset();
 
