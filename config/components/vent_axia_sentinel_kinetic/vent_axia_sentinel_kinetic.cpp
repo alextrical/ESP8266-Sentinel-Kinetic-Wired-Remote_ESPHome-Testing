@@ -56,7 +56,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_SELECT("  ", "LightFunctionSelect", this->light_function_select_);
   LOG_SELECT("  ", "OutPinLevelSelect", this->out_pin_level_select_);
   LOG_SELECT("  ", "DistanceResolutionSelect", this->distance_resolution_select_);
-  LOG_SELECT("  ", "BaudRateSelect", this->baud_rate_select_);
 #endif
 #ifdef USE_NUMBER
   LOG_NUMBER("  ", "LightThresholdNumber", this->light_threshold_number_);
@@ -86,12 +85,6 @@ void VentAxiaSentinelKineticComponent::read_all_info() {
 //   this->get_light_control_();
 //   this->query_parameters_();
 //   this->set_config_mode_(false);
-// #ifdef USE_SELECT
-//   const auto baud_rate = std::to_string(this->parent_->get_baud_rate());
-//   if (this->baud_rate_select_ != nullptr && this->baud_rate_select_->state != baud_rate) {
-//     this->baud_rate_select_->publish_state(baud_rate);
-//   }
-// #endif
 }
 
 void VentAxiaSentinelKineticComponent::restart_and_read_all_info() {
@@ -291,14 +284,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
       break;
     case lowbyte(CMD_DISABLE_CONF):
       ESP_LOGV(TAG, "Handled Disabled conf command");
-      break;
-    case lowbyte(CMD_SET_BAUD_RATE):
-      ESP_LOGV(TAG, "Handled baud rate change command");
-#ifdef USE_SELECT
-      if (this->baud_rate_select_ != nullptr) {
-        ESP_LOGE(TAG, "Change baud rate component config to %s and reinstall", this->baud_rate_select_->state.c_str());
-      }
-#endif
       break;
     case lowbyte(CMD_VERSION):
       this->version_ = format_version(buffer);
