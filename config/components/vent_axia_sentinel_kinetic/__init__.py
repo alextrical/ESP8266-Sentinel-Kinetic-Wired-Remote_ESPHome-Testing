@@ -14,23 +14,12 @@ VentAxiaSentinelKineticComponent = vent_axia_sentinel_kinetic_ns.class_("VentAxi
 
 CONF_VentAxiaSentinelKinetic_ID = "vent_axia_sentinel_kinetic_id"
 
-CONF_MAX_MOVE_DISTANCE = "max_move_distance"
-CONF_MAX_STILL_DISTANCE = "max_still_distance"
-
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(VentAxiaSentinelKineticComponent),
         cv.Optional(CONF_THROTTLE, default="1000ms"): cv.All(
             cv.positive_time_period_milliseconds,
             cv.Range(min=cv.TimePeriod(milliseconds=1)),
-        ),
-        cv.Optional(CONF_MAX_MOVE_DISTANCE): cv.invalid(
-            f"The '{CONF_MAX_MOVE_DISTANCE}' option has been moved to the '{CONF_MAX_MOVE_DISTANCE}'"
-            f" number component"
-        ),
-        cv.Optional(CONF_MAX_STILL_DISTANCE): cv.invalid(
-            f"The '{CONF_MAX_STILL_DISTANCE}' option has been moved to the '{CONF_MAX_STILL_DISTANCE}'"
-            f" number component"
         ),
         cv.Optional(CONF_TIMEOUT): cv.invalid(
             f"The '{CONF_TIMEOUT}' option has been moved to the '{CONF_TIMEOUT}'"

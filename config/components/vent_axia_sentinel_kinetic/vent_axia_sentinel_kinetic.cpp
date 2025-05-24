@@ -175,11 +175,6 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
     if (this->moving_target_distance_sensor_->get_state() != new_moving_target_distance)
       this->moving_target_distance_sensor_->publish_state(new_moving_target_distance);
   }
-  if (this->moving_target_energy_sensor_ != nullptr) {
-    int new_moving_target_energy = buffer[MOVING_ENERGY];
-    if (this->moving_target_energy_sensor_->get_state() != new_moving_target_energy)
-      this->moving_target_energy_sensor_->publish_state(new_moving_target_energy);
-  }
   if (this->still_target_distance_sensor_ != nullptr) {
     int new_still_target_distance = this->two_byte_to_int_(buffer[STILL_TARGET_LOW], buffer[STILL_TARGET_HIGH]);
     if (this->still_target_distance_sensor_->get_state() != new_still_target_distance)
