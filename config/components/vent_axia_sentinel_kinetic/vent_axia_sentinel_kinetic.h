@@ -184,7 +184,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void set_light_out_control();
 #ifdef USE_NUMBER
   void set_gate_still_threshold_number(int gate, number::Number *n);
-  void set_gate_move_threshold_number(int gate, number::Number *n);
   void set_max_distances_timeout();
   void set_gate_threshold(uint8_t gate);
 #endif
@@ -224,7 +223,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   float light_threshold_ = -1;
 #ifdef USE_NUMBER
   std::vector<number::Number *> gate_still_threshold_numbers_ = std::vector<number::Number *>(9);
-  std::vector<number::Number *> gate_move_threshold_numbers_ = std::vector<number::Number *>(9);
 #endif
 #ifdef USE_SENSOR
   std::vector<sensor::Sensor *> gate_still_sensors_ = std::vector<sensor::Sensor *>(9);

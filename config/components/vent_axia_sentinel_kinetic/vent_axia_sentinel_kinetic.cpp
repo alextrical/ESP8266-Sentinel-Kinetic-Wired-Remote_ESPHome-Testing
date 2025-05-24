@@ -66,9 +66,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   for (number::Number *n : this->gate_still_threshold_numbers_) {
     LOG_NUMBER("  ", "Still Thresholds Number", n);
   }
-  for (number::Number *n : this->gate_move_threshold_numbers_) {
-    LOG_NUMBER("  ", "Move Thresholds Number", n);
-  }
 #endif
   this->read_all_info();
   ESP_LOGCONFIG(TAG, "  Throttle_ : %ums", this->throttle_);
@@ -399,12 +396,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
       updates.push_back(set_number_value(this->max_move_distance_gate_number_, buffer[12]));
       updates.push_back(set_number_value(this->max_still_distance_gate_number_, buffer[13]));
       /*
-        Moving Sensitivities: 15~23th bytes
-      */
-      for (std::vector<number::Number *>::size_type i = 0; i != this->gate_move_threshold_numbers_.size(); i++) {
-        updates.push_back(set_number_value(this->gate_move_threshold_numbers_[i], buffer[14 + i]));
-      }
-      /*
         Still Sensitivities: 24~32th bytes
       */
       for (std::vector<number::Number *>::size_type i = 0; i != this->gate_still_threshold_numbers_.size(); i++) {
@@ -548,13 +539,11 @@ void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
 }
 
 void VentAxiaSentinelKineticComponent::set_gate_threshold(uint8_t gate) {
-  number::Number *motionsens = this->gate_move_threshold_numbers_[gate];
   number::Number *stillsens = this->gate_still_threshold_numbers_[gate];
 
-  if (!motionsens->has_state() || !stillsens->has_state()) {
+  if (!stillsens->has_state()) {
     return;
   }
-  int motion = static_cast<int>(motionsens->state);
   int still = static_cast<int>(stillsens->state);
 
   this->set_config_mode_(true);
@@ -568,7 +557,6 @@ void VentAxiaSentinelKineticComponent::set_gate_threshold(uint8_t gate) {
   // 02 00 (still sensitivtiy)
   // 28 00 00 00 (value)
   uint8_t value[18] = {0x00, 0x00, lowbyte(gate),   highbyte(gate),   0x00, 0x00,
-                       0x01, 0x00, lowbyte(motion), highbyte(motion), 0x00, 0x00,
                        0x02, 0x00, lowbyte(still),  highbyte(still),  0x00, 0x00};
   this->send_command_(CMD_GATE_SENS, value, 18);
   delay(50);  // NOLINT
@@ -578,10 +566,6 @@ void VentAxiaSentinelKineticComponent::set_gate_threshold(uint8_t gate) {
 
 void VentAxiaSentinelKineticComponent::set_gate_still_threshold_number(int gate, number::Number *n) {
   this->gate_still_threshold_numbers_[gate] = n;
-}
-
-void VentAxiaSentinelKineticComponent::set_gate_move_threshold_number(int gate, number::Number *n) {
-  this->gate_move_threshold_numbers_[gate] = n;
 }
 #endif
 
