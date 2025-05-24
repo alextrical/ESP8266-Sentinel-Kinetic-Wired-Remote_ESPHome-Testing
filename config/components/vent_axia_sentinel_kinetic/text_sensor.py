@@ -4,7 +4,6 @@ import esphome.config_validation as cv
 from esphome.const import (
     CONF_VERSION,
     ENTITY_CATEGORY_DIAGNOSTIC,
-    ICON_BLUETOOTH,
     ICON_CHIP,
 )
 

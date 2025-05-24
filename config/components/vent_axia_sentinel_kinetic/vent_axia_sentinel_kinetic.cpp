@@ -25,6 +25,7 @@ void VentAxiaSentinelKineticComponent::dump_config() {
 #endif
 #ifdef USE_SWITCH
   LOG_SWITCH("  ", "BluetoothSwitch", this->bluetooth_switch_);
+  LOG_SWITCH("  ", "UpSwitch", this->up_switch_);
 #endif
 #ifdef USE_BUTTON
   LOG_BUTTON("  ", "ResetButton", this->reset_button_);
@@ -298,6 +299,14 @@ void VentAxiaSentinelKineticComponent::set_bluetooth(bool enable) {
   uint8_t disable_cmd_value[2] = {0x00, 0x00};
   this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
+}
+
+void VentAxiaSentinelKineticComponent::set_up(bool enable) {
+  // this->set_config_mode_(true);
+  // uint8_t enable_cmd_value[2] = {0x01, 0x00};
+  // uint8_t disable_cmd_value[2] = {0x00, 0x00};
+  // this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
+  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
 void VentAxiaSentinelKineticComponent::set_distance_resolution(const std::string &state) {
