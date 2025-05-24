@@ -115,6 +115,9 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
 #ifdef USE_BUTTON
   SUB_BUTTON(up1)
+  SUB_BUTTON(down1)
+  SUB_BUTTON(set1)
+  SUB_BUTTON(main1)
 #endif
 #ifdef USE_NUMBER
   SUB_NUMBER(timeout)
