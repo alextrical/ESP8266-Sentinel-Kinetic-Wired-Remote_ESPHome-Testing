@@ -437,13 +437,6 @@ void VentAxiaSentinelKineticComponent::set_distance_resolution(const std::string
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
-void VentAxiaSentinelKineticComponent::set_baud_rate(const std::string &state) {
-  this->set_config_mode_(true);
-  uint8_t cmd_value[2] = {BAUD_RATE_ENUM_TO_INT.at(state), 0x00};
-  this->send_command_(CMD_SET_BAUD_RATE, cmd_value, 2);
-  this->set_timeout(200, [this]() { this->restart_(); });
-}
-
 void VentAxiaSentinelKineticComponent::set_bluetooth_password(const std::string &password) {
   if (password.length() != 6) {
     ESP_LOGE(TAG, "set_bluetooth_password(): invalid password length, must be exactly 6 chars '%s'", password.c_str());

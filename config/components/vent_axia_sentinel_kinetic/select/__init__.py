@@ -79,4 +79,3 @@ async def to_code(config):
             ],
         )
         await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_baud_rate_select(s))
