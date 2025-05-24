@@ -87,8 +87,6 @@ select:
   - platform: vent_axia_sentinel_kinetic
     distance_resolution:
       name: "distance resolution"
-    baud_rate:
-      name: "baud rate"
     light_function:
       name: light function
     out_pin_level:

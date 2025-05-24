@@ -2,17 +2,14 @@ import esphome.codegen as cg
 from esphome.components import select
 import esphome.config_validation as cv
 from esphome.const import (
-    CONF_BAUD_RATE,
     ENTITY_CATEGORY_CONFIG,
     ICON_LIGHTBULB,
     ICON_RULER,
     ICON_SCALE,
-    ICON_THERMOMETER,
 )
 
 from .. import CONF_VentAxiaSentinelKinetic_ID, VentAxiaSentinelKineticComponent, vent_axia_sentinel_kinetic_ns
 
-BaudRateSelect = vent_axia_sentinel_kinetic_ns.class_("BaudRateSelect", select.Select)
 DistanceResolutionSelect = vent_axia_sentinel_kinetic_ns.class_("DistanceResolutionSelect", select.Select)
 LightOutControlSelect = vent_axia_sentinel_kinetic_ns.class_("LightOutControlSelect", select.Select)
 
@@ -38,11 +35,6 @@ CONFIG_SCHEMA = {
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon=ICON_SCALE,
     ),
-    cv.Optional(CONF_BAUD_RATE): select.select_schema(
-        BaudRateSelect,
-        entity_category=ENTITY_CATEGORY_CONFIG,
-        icon=ICON_THERMOMETER,
-    ),
 }
 
 
@@ -64,18 +56,3 @@ async def to_code(config):
         )
         await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])
         cg.add(vent_axia_sentinel_kinetic_component.set_light_function_select(s))
-    if baud_rate_config := config.get(CONF_BAUD_RATE):
-        s = await select.new_select(
-            baud_rate_config,
-            options=[
-                "9600",
-                "19200",
-                "38400",
-                "57600",
-                "115200",
-                "230400",
-                "256000",
-                "460800",
-            ],
-        )
-        await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])
