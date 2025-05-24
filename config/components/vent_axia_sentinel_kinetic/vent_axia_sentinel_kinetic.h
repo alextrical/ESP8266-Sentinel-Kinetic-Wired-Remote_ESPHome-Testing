@@ -37,7 +37,6 @@ namespace vent_axia_sentinel_kinetic {
 static const uint16_t CMD_ENABLE_CONF = 0x00FF;
 static const uint16_t CMD_DISABLE_CONF = 0x00FE;
 static const uint16_t CMD_ENABLE_ENG = 0x0062;
-static const uint16_t CMD_DISABLE_ENG = 0x0063;
 static const uint16_t CMD_MAXDIST_DURATION = 0x0060;
 static const uint16_t CMD_QUERY = 0x0061;
 static const uint16_t CMD_GATE_SENS = 0x0064;
@@ -46,27 +45,10 @@ static const uint16_t CMD_QUERY_DISTANCE_RESOLUTION = 0x00AB;
 static const uint16_t CMD_SET_DISTANCE_RESOLUTION = 0x00AA;
 static const uint16_t CMD_QUERY_LIGHT_CONTROL = 0x00AE;
 static const uint16_t CMD_SET_LIGHT_CONTROL = 0x00AD;
-static const uint16_t CMD_SET_BAUD_RATE = 0x00A1;
 static const uint16_t CMD_BT_PASSWORD = 0x00A9;
 static const uint16_t CMD_RESET = 0x00A2;
 static const uint16_t CMD_RESTART = 0x00A3;
 static const uint16_t CMD_BLUETOOTH = 0x00A4;
-
-enum BaudRateStructure : uint8_t {
-  BAUD_RATE_9600 = 1,
-  BAUD_RATE_19200 = 2,
-  BAUD_RATE_38400 = 3,
-  BAUD_RATE_57600 = 4,
-  BAUD_RATE_115200 = 5,
-  BAUD_RATE_230400 = 6,
-  BAUD_RATE_256000 = 7,
-  BAUD_RATE_460800 = 8
-};
-
-static const std::map<std::string, uint8_t> BAUD_RATE_ENUM_TO_INT{
-    {"9600", BAUD_RATE_9600},     {"19200", BAUD_RATE_19200},   {"38400", BAUD_RATE_38400},
-    {"57600", BAUD_RATE_57600},   {"115200", BAUD_RATE_115200}, {"230400", BAUD_RATE_230400},
-    {"256000", BAUD_RATE_256000}, {"460800", BAUD_RATE_460800}};
 
 enum DistanceResolutionStructure : uint8_t { DISTANCE_RESOLUTION_0_2 = 0x01, DISTANCE_RESOLUTION_0_75 = 0x00 };
 
@@ -75,17 +57,17 @@ static const std::map<std::string, uint8_t> DISTANCE_RESOLUTION_ENUM_TO_INT{{"0.
 static const std::map<uint8_t, std::string> DISTANCE_RESOLUTION_INT_TO_ENUM{{DISTANCE_RESOLUTION_0_2, "0.2m"},
                                                                             {DISTANCE_RESOLUTION_0_75, "0.75m"}};
 // Commands values
-static const uint16_t CMD_MAX_MOVE_VALUE = 0x0000;
-static const uint16_t CMD_MAX_STILL_VALUE = 0x0001;
-static const uint16_t CMD_DURATION_VALUE = 0x0002;
+// static const uint16_t CMD_MAX_MOVE_VALUE = 0x0000;
+// static const uint16_t CMD_MAX_STILL_VALUE = 0x0001;
+// static const uint16_t CMD_DURATION_VALUE = 0x0002;
 // Command Header & Footer
 // static const uint8_t CMD_FRAME_HEADER[4] = {0xFD, 0xFC, 0xFB, 0xFA};
 // static const uint8_t CMD_FRAME_END[4] = {0x04, 0x03, 0x02, 0x01};
 static const uint8_t CMD_FRAME_HEADER[5] = {0x04, 0x05, 0xAF, 0xEF, 0xFB};
 static const uint8_t CMD_FRAME_END[2] = {0x00, 0x00};
 // Data Header & Footer
-static const uint8_t DATA_FRAME_HEADER[4] = {0xF4, 0xF3, 0xF2, 0xF1};
-static const uint8_t DATA_FRAME_END[4] = {0xF8, 0xF7, 0xF6, 0xF5};
+// static const uint8_t DATA_FRAME_HEADER[4] = {0xF4, 0xF3, 0xF2, 0xF1};
+// static const uint8_t DATA_FRAME_END[4] = {0xF8, 0xF7, 0xF6, 0xF5};
 /*
 Data Type: 6th byte
 Target states: 9th byte
