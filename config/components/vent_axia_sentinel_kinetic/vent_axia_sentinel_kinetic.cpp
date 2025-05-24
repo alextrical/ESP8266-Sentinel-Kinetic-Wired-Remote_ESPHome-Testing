@@ -30,7 +30,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_SWITCH("  ", "mainSwitch", this->main_switch_);
 #endif
 #ifdef USE_BUTTON
-  LOG_BUTTON("  ", "ResetButton", this->reset_button_);
   LOG_BUTTON("  ", "Up1Button", this->up1_button_);
 #endif
 #ifdef USE_SENSOR
