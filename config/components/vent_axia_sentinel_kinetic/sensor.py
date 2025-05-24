@@ -22,7 +22,6 @@ CONF_STILL_DISTANCE = "still_distance"
 CONF_MOVING_ENERGY = "moving_energy"
 CONF_STILL_ENERGY = "still_energy"
 CONF_DETECTION_DISTANCE = "detection_distance"
-CONF_MOVE_ENERGY = "move_energy"
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -62,11 +61,6 @@ CONFIG_SCHEMA = CONFIG_SCHEMA.extend(
     {
         cv.Optional(f"g{x}"): cv.Schema(
             {
-                cv.Optional(CONF_MOVE_ENERGY): sensor.sensor_schema(
-                    unit_of_measurement=UNIT_PERCENT,
-                    entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
-                    icon=ICON_MOTION_SENSOR,
-                ),
                 cv.Optional(CONF_STILL_ENERGY): sensor.sensor_schema(
                     unit_of_measurement=UNIT_PERCENT,
                     entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
@@ -101,9 +95,6 @@ async def to_code(config):
         cg.add(vent_axia_sentinel_kinetic_component.set_detection_distance_sensor(sens))
     for x in range(9):
         if gate_conf := config.get(f"g{x}"):
-            if move_config := gate_conf.get(CONF_MOVE_ENERGY):
-                sens = await sensor.new_sensor(move_config)
-                cg.add(vent_axia_sentinel_kinetic_component.set_gate_move_sensor(x, sens))
             if still_config := gate_conf.get(CONF_STILL_ENERGY):
                 sens = await sensor.new_sensor(still_config)
                 cg.add(vent_axia_sentinel_kinetic_component.set_gate_still_sensor(x, sens))
