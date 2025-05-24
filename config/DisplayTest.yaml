@@ -60,8 +60,6 @@ number:
       name: timeout
     light_threshold:
       name: light threshold
-    max_still_distance_gate:
-      name: max still distance gate
 
 button:
   - platform: vent_axia_sentinel_kinetic
