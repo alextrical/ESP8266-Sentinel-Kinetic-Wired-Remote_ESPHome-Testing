@@ -9,39 +9,39 @@ from esphome.const import (
 
 from .. import CONF_VentAxiaSentinelKinetic_ID, VentAxiaSentinelKineticComponent, vent_axia_sentinel_kinetic_ns
 
-Up1Button = vent_axia_sentinel_kinetic_ns.class_("Up1Button", button.Button)
-Down1Button = vent_axia_sentinel_kinetic_ns.class_("Down1Button", button.Button)
-Set1Button = vent_axia_sentinel_kinetic_ns.class_("Set1Button", button.Button)
-Main1Button = vent_axia_sentinel_kinetic_ns.class_("Main1Button", button.Button)
+UpButton = vent_axia_sentinel_kinetic_ns.class_("UpButton", button.Button)
+DownButton = vent_axia_sentinel_kinetic_ns.class_("DownButton", button.Button)
+SetButton = vent_axia_sentinel_kinetic_ns.class_("SetButton", button.Button)
+MainButton = vent_axia_sentinel_kinetic_ns.class_("MainButton", button.Button)
 
-CONF_UP1_BUTTON = "up1"
-CONF_DOWN1_BUTTON = "down1"
-CONF_SET1_BUTTON = "set1"
-CONF_MAIN1_BUTTON = "main1"
-# CONF_DOWN = "down1"
+CONF_UP_BUTTON = "up"
+CONF_DOWN_BUTTON = "down"
+CONF_SET_BUTTON = "set"
+CONF_MAIN_BUTTON = "main"
+# CONF_DOWN = "down"
 
 CONFIG_SCHEMA = {
     cv.GenerateID(CONF_VentAxiaSentinelKinetic_ID): cv.use_id(VentAxiaSentinelKineticComponent),
-    cv.Optional(CONF_UP1_BUTTON): button.button_schema(
-        Up1Button,
+    cv.Optional(CONF_UP_BUTTON): button.button_schema(
+        UpButton,
         device_class=DEVICE_CLASS_RESTART,
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon=ICON_RESTART_ALERT,
     ),
-    cv.Optional(CONF_DOWN1_BUTTON): button.button_schema(
-        Down1Button,
+    cv.Optional(CONF_DOWN_BUTTON): button.button_schema(
+        DownButton,
         device_class=DEVICE_CLASS_RESTART,
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon=ICON_RESTART_ALERT,
     ),
-    cv.Optional(CONF_SET1_BUTTON): button.button_schema(
-        Set1Button,
+    cv.Optional(CONF_SET_BUTTON): button.button_schema(
+        SetButton,
         device_class=DEVICE_CLASS_RESTART,
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon=ICON_RESTART_ALERT,
     ),
-    cv.Optional(CONF_MAIN1_BUTTON): button.button_schema(
-        Main1Button,
+    cv.Optional(CONF_MAIN_BUTTON): button.button_schema(
+        MainButton,
         device_class=DEVICE_CLASS_RESTART,
         entity_category=ENTITY_CATEGORY_CONFIG,
         icon=ICON_RESTART_ALERT,
@@ -51,20 +51,20 @@ CONFIG_SCHEMA = {
 
 async def to_code(config):
     vent_axia_sentinel_kinetic_component = await cg.get_variable(config[CONF_VentAxiaSentinelKinetic_ID])
-    if factory_reset_up1 := config.get(CONF_UP1_BUTTON):
-        b = await button.new_button(factory_reset_up1)
+    if up_button := config.get(CONF_UP_BUTTON):
+        b = await button.new_button(up_button)
         await cg.register_parented(b, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_up1_button(b))
-    if factory_reset_down1 := config.get(CONF_DOWN1_BUTTON):
-        b = await button.new_button(factory_reset_down1)
+        cg.add(vent_axia_sentinel_kinetic_component.set_up_button(b))
+    if down_button := config.get(CONF_DOWN_BUTTON):
+        b = await button.new_button(down_button)
         await cg.register_parented(b, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_down1_button(b))
-    if factory_reset_set1 := config.get(CONF_SET1_BUTTON):
-        b = await button.new_button(factory_reset_set1)
+        cg.add(vent_axia_sentinel_kinetic_component.set_down_button(b))
+    if set_button := config.get(CONF_SET_BUTTON):
+        b = await button.new_button(set_button)
         await cg.register_parented(b, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_set1_button(b))
-    if factory_reset_main1 := config.get(CONF_MAIN1_BUTTON):
-        b = await button.new_button(factory_reset_main1)
+        cg.add(vent_axia_sentinel_kinetic_component.set_set_button(b))
+    if main_button := config.get(CONF_MAIN_BUTTON):
+        b = await button.new_button(main_button)
         await cg.register_parented(b, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_main1_button(b))
+        cg.add(vent_axia_sentinel_kinetic_component.set_main_button(b))
         

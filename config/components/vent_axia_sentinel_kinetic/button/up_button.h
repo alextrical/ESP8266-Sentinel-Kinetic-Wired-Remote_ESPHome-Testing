@@ -6,9 +6,9 @@
 namespace esphome {
 namespace vent_axia_sentinel_kinetic {
 
-class Set1Button : public button::Button, public Parented<VentAxiaSentinelKineticComponent> {
+class UpButton : public button::Button, public Parented<VentAxiaSentinelKineticComponent> {
  public:
-  Set1Button() = default;
+  UpButton() = default;
 
  protected:
   void press_action() override;

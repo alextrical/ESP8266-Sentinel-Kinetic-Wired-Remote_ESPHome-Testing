@@ -114,10 +114,10 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   SUB_SWITCH(main)
 #endif
 #ifdef USE_BUTTON
-  SUB_BUTTON(up1)
-  SUB_BUTTON(down1)
-  SUB_BUTTON(set1)
-  SUB_BUTTON(main1)
+  SUB_BUTTON(up)
+  SUB_BUTTON(down)
+  SUB_BUTTON(set)
+  SUB_BUTTON(main)
 #endif
 #ifdef USE_NUMBER
   SUB_NUMBER(timeout)
@@ -143,7 +143,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void set_set(bool enable);
   void set_main(bool enable);
   void set_distance_resolution(const std::string &state);
-  void factory_reset();
 
  protected:
   int two_byte_to_int_(char firstbyte, char secondbyte) { return (int16_t) (secondbyte << 8) + firstbyte; }

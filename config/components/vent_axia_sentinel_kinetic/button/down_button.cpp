@@ -1,9 +1,9 @@
-#include "down1_button.h"
+#include "down_button.h"
 
 namespace esphome {
 namespace vent_axia_sentinel_kinetic {
 
-void Down1Button::press_action() {  }
+void DownButton::press_action() {  }
 
 }  // namespace vent_axia_sentinel_kinetic
 }  // namespace esphome

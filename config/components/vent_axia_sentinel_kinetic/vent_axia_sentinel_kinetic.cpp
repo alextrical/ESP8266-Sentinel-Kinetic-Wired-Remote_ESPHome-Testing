@@ -30,10 +30,10 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_SWITCH("  ", "MainSwitch", this->main_switch_);
 #endif
 #ifdef USE_BUTTON
-  LOG_BUTTON("  ", "Up1Button", this->up1_button_);
-  LOG_BUTTON("  ", "Down1Button", this->down1_button_);
-  LOG_BUTTON("  ", "Set1Button", this->set1_button_);
-  LOG_BUTTON("  ", "Main1Button", this->main1_button_);
+  LOG_BUTTON("  ", "UpButton", this->up_button_);
+  LOG_BUTTON("  ", "DownButton", this->down_button_);
+  LOG_BUTTON("  ", "SetButton", this->set_button_);
+  LOG_BUTTON("  ", "MainButton", this->main_button_);
 #endif
 #ifdef USE_SENSOR
   LOG_SENSOR("  ", "LightSensor", this->light_sensor_);
@@ -316,12 +316,6 @@ void VentAxiaSentinelKineticComponent::set_distance_resolution(const std::string
   this->set_config_mode_(true);
   uint8_t cmd_value[2] = {DISTANCE_RESOLUTION_ENUM_TO_INT.at(state), 0x00};
   this->send_command_(CMD_SET_DISTANCE_RESOLUTION, cmd_value, 2);
-  // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
-}
-
-void VentAxiaSentinelKineticComponent::factory_reset() {
-  this->set_config_mode_(true);
-  this->send_command_(CMD_RESET, nullptr, 0);
   // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 

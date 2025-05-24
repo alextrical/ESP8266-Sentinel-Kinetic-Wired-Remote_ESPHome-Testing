@@ -53,13 +53,13 @@ number:
 
 button:
   - platform: vent_axia_sentinel_kinetic
-    up1:
+    up:
       name: "Up Button"
-    down1:
+    down:
       name: "Down Button"
-    set1:
+    set:
       name: "Set Button"
-    main1:
+    main:
       name: "Main Button"
     # factory_reset:
     #   name: "factory reset"
