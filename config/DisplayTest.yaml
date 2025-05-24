@@ -111,33 +111,6 @@ number:
       name: max move distance gate
     max_still_distance_gate:
       name: max still distance gate
-    g0:
-      still_threshold:
-        name: g0 still threshold
-    g1:
-      still_threshold:
-        name: g1 still threshold
-    g2:
-      still_threshold:
-        name: g2 still threshold
-    g3:
-      still_threshold:
-        name: g3 still threshold
-    g4:
-      still_threshold:
-        name: g4 still threshold
-    g5:
-      still_threshold:
-        name: g5 still threshold
-    g6:
-      still_threshold:
-        name: g6 still threshold
-    g7:
-      still_threshold:
-        name: g7 still threshold
-    g8:
-      still_threshold:
-        name: g8 still threshold
 
 button:
   - platform: vent_axia_sentinel_kinetic

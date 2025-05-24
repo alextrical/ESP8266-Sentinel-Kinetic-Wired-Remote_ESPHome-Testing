@@ -63,9 +63,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_NUMBER("  ", "MaxStillDistanceGateNumber", this->max_still_distance_gate_number_);
   LOG_NUMBER("  ", "MaxMoveDistanceGateNumber", this->max_move_distance_gate_number_);
   LOG_NUMBER("  ", "TimeoutNumber", this->timeout_number_);
-  for (number::Number *n : this->gate_still_threshold_numbers_) {
-    LOG_NUMBER("  ", "Still Thresholds Number", n);
-  }
 #endif
   this->read_all_info();
   ESP_LOGCONFIG(TAG, "  Throttle_ : %ums", this->throttle_);
@@ -396,12 +393,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
       updates.push_back(set_number_value(this->max_move_distance_gate_number_, buffer[12]));
       updates.push_back(set_number_value(this->max_still_distance_gate_number_, buffer[13]));
       /*
-        Still Sensitivities: 24~32th bytes
-      */
-      for (std::vector<number::Number *>::size_type i = 0; i != this->gate_still_threshold_numbers_.size(); i++) {
-        updates.push_back(set_number_value(this->gate_still_threshold_numbers_[i], buffer[23 + i]));
-      }
-      /*
         None Duration: 33~34th bytes
       */
       updates.push_back(set_number_value(this->timeout_number_, this->two_byte_to_int_(buffer[32], buffer[33])));
@@ -536,36 +527,6 @@ void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
   this->query_parameters_();
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
   this->set_config_mode_(false);
-}
-
-void VentAxiaSentinelKineticComponent::set_gate_threshold(uint8_t gate) {
-  number::Number *stillsens = this->gate_still_threshold_numbers_[gate];
-
-  if (!stillsens->has_state()) {
-    return;
-  }
-  int still = static_cast<int>(stillsens->state);
-
-  this->set_config_mode_(true);
-  // reference
-  // https://drive.google.com/drive/folders/1p4dhbEJA3YubyIjIIC7wwVsSo8x29Fq-?spm=a2g0o.detail.1000023.17.93465697yFwVxH
-  //   Send data: configure the motion sensitivity of distance gate 3 to 40, and the static sensitivity of 40
-  // 00 00 (gate)
-  // 03 00 00 00 (gate number)
-  // 01 00 (motion sensitivity)
-  // 28 00 00 00 (value)
-  // 02 00 (still sensitivtiy)
-  // 28 00 00 00 (value)
-  uint8_t value[18] = {0x00, 0x00, lowbyte(gate),   highbyte(gate),   0x00, 0x00,
-                       0x02, 0x00, lowbyte(still),  highbyte(still),  0x00, 0x00};
-  this->send_command_(CMD_GATE_SENS, value, 18);
-  delay(50);  // NOLINT
-  this->query_parameters_();
-  this->set_config_mode_(false);
-}
-
-void VentAxiaSentinelKineticComponent::set_gate_still_threshold_number(int gate, number::Number *n) {
-  this->gate_still_threshold_numbers_[gate] = n;
 }
 #endif
 
