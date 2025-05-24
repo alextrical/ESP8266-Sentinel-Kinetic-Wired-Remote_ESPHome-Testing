@@ -22,7 +22,10 @@ void VentAxiaSentinelKineticComponent::loop() {
 }
 
 void VentAxiaSentinelKineticComponent::dump_config(){
-    ESP_LOGCONFIG(TAG, "VentAxiaSentinelKinetic:");
+  ESP_LOGCONFIG(TAG, "VentAxiaSentinelKinetic:");
+#ifdef USE_BUTTON
+  // LOG_BUTTON("  ", "UpButton", this->up_button_);
+#endif
 }
 
 void VentAxiaSentinelKineticComponent::send_alive_str_() { this->send_command_(CMD_ALIVE_HEADER, 4, CMD_ALIVE_DATA); }

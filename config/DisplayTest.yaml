@@ -159,10 +159,17 @@ vent_axia_sentinel_kinetic:
 #       still_threshold:
 #         name: g8 still threshold
 
+# switch:
+#   - platform: vent_axia_sentinel_kinetic
+#     up_button:
+#       name: "Up Button"
+
 # button:
 #   - platform: vent_axia_sentinel_kinetic
-#     # down_button:
-#     #   name: "Down Button"
+#     up_button:
+#       name: "Up Button"
+    # down_button:
+    #   name: "Down Button"
 #     restart:
 #       name: "restart"
 #     query_params:
