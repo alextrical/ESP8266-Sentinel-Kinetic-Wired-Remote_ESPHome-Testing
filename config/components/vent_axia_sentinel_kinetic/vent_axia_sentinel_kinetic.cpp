@@ -36,21 +36,9 @@ void VentAxiaSentinelKineticComponent::dump_config() {
 #endif
 #ifdef USE_SENSOR
   LOG_SENSOR("  ", "LightSensor", this->light_sensor_);
-  LOG_SENSOR("  ", "MovingTargetDistanceSensor", this->moving_target_distance_sensor_);
-  LOG_SENSOR("  ", "StillTargetDistanceSensor", this->still_target_distance_sensor_);
-  LOG_SENSOR("  ", "MovingTargetEnergySensor", this->moving_target_energy_sensor_);
-  LOG_SENSOR("  ", "StillTargetEnergySensor", this->still_target_energy_sensor_);
-  LOG_SENSOR("  ", "DetectionDistanceSensor", this->detection_distance_sensor_);
-  for (sensor::Sensor *s : this->gate_still_sensors_) {
-    LOG_SENSOR("  ", "NthGateStillSesnsor", s);
-  }
-  for (sensor::Sensor *s : this->gate_move_sensors_) {
-    LOG_SENSOR("  ", "NthGateMoveSesnsor", s);
-  }
 #endif
 #ifdef USE_TEXT_SENSOR
   LOG_TEXT_SENSOR("  ", "VersionTextSensor", this->version_text_sensor_);
-  LOG_TEXT_SENSOR("  ", "MacTextSensor", this->mac_text_sensor_);
 #endif
 #ifdef USE_SELECT
   LOG_SELECT("  ", "LightFunctionSelect", this->light_function_select_);
@@ -62,14 +50,12 @@ void VentAxiaSentinelKineticComponent::dump_config() {
 #endif
   this->read_all_info();
   ESP_LOGCONFIG(TAG, "  Throttle_ : %ums", this->throttle_);
-  ESP_LOGCONFIG(TAG, "  MAC Address : %s", const_cast<char *>(this->mac_.c_str()));
   ESP_LOGCONFIG(TAG, "  Firmware Version : %s", const_cast<char *>(this->version_.c_str()));
 }
 
 void VentAxiaSentinelKineticComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up VentAxiaSentinelKinetic...");
   this->read_all_info();
-  ESP_LOGCONFIG(TAG, "Mac Address : %s", const_cast<char *>(this->mac_.c_str()));
   ESP_LOGCONFIG(TAG, "Firmware Version : %s", const_cast<char *>(this->version_.c_str()));
   ESP_LOGCONFIG(TAG, "VentAxiaSentinelKinetic setup complete.");
 }
@@ -155,12 +141,6 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
   if (this->target_binary_sensor_ != nullptr) {
     this->target_binary_sensor_->publish_state(target_state != 0x00);
   }
-  if (this->moving_target_binary_sensor_ != nullptr) {
-    this->moving_target_binary_sensor_->publish_state(CHECK_BIT(target_state, 0));
-  }
-  if (this->still_target_binary_sensor_ != nullptr) {
-    this->still_target_binary_sensor_->publish_state(CHECK_BIT(target_state, 1));
-  }
 #endif
   /*
     Moving target distance: 10~11th bytes
@@ -170,31 +150,6 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
     Detect distance: 16~17th bytes
   */
 #ifdef USE_SENSOR
-  if (this->moving_target_distance_sensor_ != nullptr) {
-    int new_moving_target_distance = this->two_byte_to_int_(buffer[MOVING_TARGET_LOW], buffer[MOVING_TARGET_HIGH]);
-    if (this->moving_target_distance_sensor_->get_state() != new_moving_target_distance)
-      this->moving_target_distance_sensor_->publish_state(new_moving_target_distance);
-  }
-  if (this->still_target_distance_sensor_ != nullptr) {
-    int new_still_target_distance = this->two_byte_to_int_(buffer[STILL_TARGET_LOW], buffer[STILL_TARGET_HIGH]);
-    if (this->still_target_distance_sensor_->get_state() != new_still_target_distance)
-      this->still_target_distance_sensor_->publish_state(new_still_target_distance);
-  }
-  if (this->detection_distance_sensor_ != nullptr) {
-    int new_detect_distance = this->two_byte_to_int_(buffer[DETECT_DISTANCE_LOW], buffer[DETECT_DISTANCE_HIGH]);
-    if (this->detection_distance_sensor_->get_state() != new_detect_distance)
-      this->detection_distance_sensor_->publish_state(new_detect_distance);
-  }
-  for (auto *s : this->gate_move_sensors_) {
-    if (s != nullptr && !std::isnan(s->get_state())) {
-      s->publish_state(NAN);
-    }
-  }
-  for (auto *s : this->gate_still_sensors_) {
-    if (s != nullptr && !std::isnan(s->get_state())) {
-      s->publish_state(NAN);
-    }
-  }
   if (this->light_sensor_ != nullptr && !std::isnan(this->light_sensor_->get_state())) {
     this->light_sensor_->publish_state(NAN);
   }
@@ -316,11 +271,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
       }
       this->mac_ = format_mac(buffer);
       ESP_LOGV(TAG, "MAC Address is: %s", const_cast<char *>(this->mac_.c_str()));
-#ifdef USE_TEXT_SENSOR
-      if (this->mac_text_sensor_ != nullptr) {
-        this->mac_text_sensor_->publish_state(this->mac_);
-      }
-#endif
 #ifdef USE_SWITCH
       if (this->bluetooth_switch_ != nullptr) {
         this->bluetooth_switch_->publish_state(this->mac_ != UNKNOWN_MAC);
@@ -467,11 +417,6 @@ void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
   this->set_config_mode_(false);
 }
-#endif
-
-#ifdef USE_SENSOR
-void VentAxiaSentinelKineticComponent::set_gate_move_sensor(int gate, sensor::Sensor *s) { this->gate_move_sensors_[gate] = s; }
-void VentAxiaSentinelKineticComponent::set_gate_still_sensor(int gate, sensor::Sensor *s) { this->gate_still_sensors_[gate] = s; }
 #endif
 
 }  // namespace vent_axia_sentinel_kinetic

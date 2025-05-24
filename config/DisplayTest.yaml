@@ -40,8 +40,6 @@ sensor:
   - platform: vent_axia_sentinel_kinetic
     light:
       name: light
-    detection_distance:
-      name: Detection Distance
 
 switch:
   - platform: vent_axia_sentinel_kinetic

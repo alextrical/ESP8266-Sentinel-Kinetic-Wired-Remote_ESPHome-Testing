@@ -136,12 +136,7 @@ enum AckDataStructure : uint8_t { COMMAND = 6, COMMAND_STATUS = 7 };
 //  char cmd[2] = {enable ? 0xFF : 0xFE, 0x00};
 class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevice {
 #ifdef USE_SENSOR
-  SUB_SENSOR(moving_target_distance)
-  SUB_SENSOR(still_target_distance)
-  SUB_SENSOR(moving_target_energy)
-  SUB_SENSOR(still_target_energy)
   SUB_SENSOR(light)
-  SUB_SENSOR(detection_distance)
 #endif
 #ifdef USE_BINARY_SENSOR
   SUB_BINARY_SENSOR(target)
@@ -151,11 +146,9 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
 #ifdef USE_TEXT_SENSOR
   SUB_TEXT_SENSOR(version)
-  SUB_TEXT_SENSOR(mac)
 #endif
 #ifdef USE_SELECT
   SUB_SELECT(distance_resolution)
-  SUB_SELECT(baud_rate)
   SUB_SELECT(light_function)
   SUB_SELECT(out_pin_level)
 #endif
@@ -212,10 +205,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   std::string mac_;
   std::string out_pin_level_;
   std::string light_function_;
-#ifdef USE_SENSOR
-  std::vector<sensor::Sensor *> gate_still_sensors_ = std::vector<sensor::Sensor *>(9);
-  std::vector<sensor::Sensor *> gate_move_sensors_ = std::vector<sensor::Sensor *>(9);
-#endif
 };
 
 }  // namespace vent_axia_sentinel_kinetic
