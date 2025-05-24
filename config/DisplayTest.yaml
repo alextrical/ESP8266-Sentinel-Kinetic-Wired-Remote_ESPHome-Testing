@@ -58,8 +58,6 @@ number:
   - platform: vent_axia_sentinel_kinetic
     timeout:
       name: timeout
-    light_threshold:
-      name: light threshold
 
 button:
   - platform: vent_axia_sentinel_kinetic
@@ -83,7 +81,3 @@ select:
   - platform: vent_axia_sentinel_kinetic
     distance_resolution:
       name: "distance resolution"
-    light_function:
-      name: light function
-    out_pin_level:
-      name: out pin level

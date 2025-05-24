@@ -58,7 +58,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_SELECT("  ", "DistanceResolutionSelect", this->distance_resolution_select_);
 #endif
 #ifdef USE_NUMBER
-  LOG_NUMBER("  ", "LightThresholdNumber", this->light_threshold_number_);
   LOG_NUMBER("  ", "TimeoutNumber", this->timeout_number_);
 #endif
   this->read_all_info();
@@ -305,10 +304,7 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
     } break;
     case lowbyte(CMD_QUERY_LIGHT_CONTROL): {
       this->light_function_ = LIGHT_FUNCTION_INT_TO_ENUM.at(buffer[10]);
-      this->light_threshold_ = buffer[11] * 1.0;
       this->out_pin_level_ = OUT_PIN_LEVEL_INT_TO_ENUM.at(buffer[12]);
-      ESP_LOGV(TAG, "Light function is: %s", const_cast<char *>(this->light_function_.c_str()));
-      ESP_LOGV(TAG, "Light threshold is: %f", this->light_threshold_);
       ESP_LOGV(TAG, "Out pin level is: %s", const_cast<char *>(this->out_pin_level_.c_str()));
 #ifdef USE_SELECT
       if (this->light_function_select_ != nullptr && this->light_function_select_->state != this->light_function_) {
@@ -316,13 +312,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
       }
       if (this->out_pin_level_select_ != nullptr && this->out_pin_level_select_->state != this->out_pin_level_) {
         this->out_pin_level_select_->publish_state(this->out_pin_level_);
-      }
-#endif
-#ifdef USE_NUMBER
-      if (this->light_threshold_number_ != nullptr &&
-          (!this->light_threshold_number_->has_state() ||
-           this->light_threshold_number_->state != this->light_threshold_)) {
-        this->light_threshold_number_->publish_state(this->light_threshold_);
       }
 #endif
     } break;
@@ -484,35 +473,6 @@ void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
   this->set_config_mode_(false);
 }
 #endif
-
-void VentAxiaSentinelKineticComponent::set_light_out_control() {
-#ifdef USE_NUMBER
-  if (this->light_threshold_number_ != nullptr && this->light_threshold_number_->has_state()) {
-    this->light_threshold_ = this->light_threshold_number_->state;
-  }
-#endif
-#ifdef USE_SELECT
-  if (this->light_function_select_ != nullptr && this->light_function_select_->has_state()) {
-    this->light_function_ = this->light_function_select_->state;
-  }
-  if (this->out_pin_level_select_ != nullptr && this->out_pin_level_select_->has_state()) {
-    this->out_pin_level_ = this->out_pin_level_select_->state;
-  }
-#endif
-  if (this->light_function_.empty() || this->out_pin_level_.empty() || this->light_threshold_ < 0) {
-    return;
-  }
-  this->set_config_mode_(true);
-  uint8_t light_function = LIGHT_FUNCTION_ENUM_TO_INT.at(this->light_function_);
-  uint8_t light_threshold = static_cast<uint8_t>(this->light_threshold_);
-  uint8_t out_pin_level = OUT_PIN_LEVEL_ENUM_TO_INT.at(this->out_pin_level_);
-  uint8_t value[4] = {light_function, light_threshold, out_pin_level, 0x00};
-  this->send_command_(CMD_SET_LIGHT_CONTROL, value, 4);
-  delay(50);  // NOLINT
-  this->get_light_control_();
-  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
-  this->set_config_mode_(false);
-}
 
 #ifdef USE_SENSOR
 void VentAxiaSentinelKineticComponent::set_gate_move_sensor(int gate, sensor::Sensor *s) { this->gate_move_sensors_[gate] = s; }

@@ -18,9 +18,7 @@ from esphome.const import (
 from .. import CONF_VentAxiaSentinelKinetic_ID, VentAxiaSentinelKineticComponent, vent_axia_sentinel_kinetic_ns
 
 GateThresholdNumber = vent_axia_sentinel_kinetic_ns.class_("GateThresholdNumber", number.Number)
-LightThresholdNumber = vent_axia_sentinel_kinetic_ns.class_("LightThresholdNumber", number.Number)
 MaxDistanceTimeoutNumber = vent_axia_sentinel_kinetic_ns.class_("MaxDistanceTimeoutNumber", number.Number)
-CONF_LIGHT_THRESHOLD = "light_threshold"
 TIMEOUT_GROUP = "timeout"
 
 CONFIG_SCHEMA = cv.Schema(
@@ -31,12 +29,6 @@ CONFIG_SCHEMA = cv.Schema(
             unit_of_measurement=UNIT_SECOND,
             entity_category=ENTITY_CATEGORY_CONFIG,
             icon=ICON_TIMELAPSE,
-        ),
-        cv.Optional(CONF_LIGHT_THRESHOLD): number.number_schema(
-            LightThresholdNumber,
-            device_class=DEVICE_CLASS_ILLUMINANCE,
-            entity_category=ENTITY_CATEGORY_CONFIG,
-            icon=ICON_LIGHTBULB,
         ),
     }
 )
@@ -50,9 +42,3 @@ async def to_code(config):
         )
         await cg.register_parented(n, config[CONF_VentAxiaSentinelKinetic_ID])
         cg.add(vent_axia_sentinel_kinetic_component.set_timeout_number(n))
-    if light_threshold_config := config.get(CONF_LIGHT_THRESHOLD):
-        n = await number.new_number(
-            light_threshold_config, min_value=0, max_value=255, step=1
-        )
-        await cg.register_parented(n, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_light_threshold_number(n))

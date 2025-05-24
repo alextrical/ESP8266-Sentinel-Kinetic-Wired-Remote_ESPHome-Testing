@@ -170,7 +170,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
 #ifdef USE_NUMBER
   SUB_NUMBER(timeout)
-  SUB_NUMBER(light_threshold)
 #endif
 
  public:
@@ -178,7 +177,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void setup() override;
   void dump_config() override;
   void loop() override;
-  void set_light_out_control();
 #ifdef USE_NUMBER
   void set_max_distances_timeout();
   void set_gate_threshold(uint8_t gate);
@@ -215,7 +213,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   std::string mac_;
   std::string out_pin_level_;
   std::string light_function_;
-  float light_threshold_ = -1;
 #ifdef USE_SENSOR
   std::vector<sensor::Sensor *> gate_still_sensors_ = std::vector<sensor::Sensor *>(9);
   std::vector<sensor::Sensor *> gate_move_sensors_ = std::vector<sensor::Sensor *>(9);
