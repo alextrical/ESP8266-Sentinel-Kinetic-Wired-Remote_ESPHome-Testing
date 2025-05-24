@@ -37,8 +37,6 @@ sensor:
 
 switch:
   - platform: vent_axia_sentinel_kinetic
-    bluetooth:
-      name: "control bluetooth"
     up:
       name: "control up"
     down:

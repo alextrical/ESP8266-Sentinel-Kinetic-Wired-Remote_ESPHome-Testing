@@ -24,7 +24,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_BINARY_SENSOR("  ", "TargetBinarySensor", this->target_binary_sensor_);
 #endif
 #ifdef USE_SWITCH
-  LOG_SWITCH("  ", "BluetoothSwitch", this->bluetooth_switch_);
   LOG_SWITCH("  ", "UpSwitch", this->up_switch_);
   LOG_SWITCH("  ", "DownSwitch", this->down_switch_);
   LOG_SWITCH("  ", "SetSwitch", this->set_switch_);
@@ -228,17 +227,11 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
     case lowbyte(CMD_GATE_SENS):
       ESP_LOGV(TAG, "Handled sensitivity command");
       break;
-    case lowbyte(CMD_BLUETOOTH):
-      ESP_LOGV(TAG, "Handled bluetooth command");
-      break;
     case lowbyte(CMD_SET_DISTANCE_RESOLUTION):
       ESP_LOGV(TAG, "Handled set distance resolution command");
       break;
     case lowbyte(CMD_SET_LIGHT_CONTROL):
       ESP_LOGV(TAG, "Handled set light control command");
-      break;
-    case lowbyte(CMD_BT_PASSWORD):
-      ESP_LOGV(TAG, "Handled set bluetooth password command");
       break;
     case lowbyte(CMD_QUERY):  // Query parameters response
     {
@@ -296,19 +289,10 @@ void VentAxiaSentinelKineticComponent::set_config_mode_(bool enable) {
   this->send_command_(cmd, enable ? cmd_value : nullptr, 2);
 }
 
-void VentAxiaSentinelKineticComponent::set_bluetooth(bool enable) {
-  this->set_config_mode_(true);
-  uint8_t enable_cmd_value[2] = {0x01, 0x00};
-  uint8_t disable_cmd_value[2] = {0x00, 0x00};
-  this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
-  this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
-}
-
 void VentAxiaSentinelKineticComponent::set_up(bool enable) {
   // this->set_config_mode_(true);
   // uint8_t enable_cmd_value[2] = {0x01, 0x00};
   // uint8_t disable_cmd_value[2] = {0x00, 0x00};
-  // this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
   // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
@@ -316,7 +300,6 @@ void VentAxiaSentinelKineticComponent::set_down(bool enable) {
   // this->set_config_mode_(true);
   // uint8_t enable_cmd_value[2] = {0x01, 0x00};
   // uint8_t disable_cmd_value[2] = {0x00, 0x00};
-  // this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
   // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
@@ -324,7 +307,6 @@ void VentAxiaSentinelKineticComponent::set_set(bool enable) {
   // this->set_config_mode_(true);
   // uint8_t enable_cmd_value[2] = {0x01, 0x00};
   // uint8_t disable_cmd_value[2] = {0x00, 0x00};
-  // this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
   // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
@@ -332,7 +314,6 @@ void VentAxiaSentinelKineticComponent::set_main(bool enable) {
   // this->set_config_mode_(true);
   // uint8_t enable_cmd_value[2] = {0x01, 0x00};
   // uint8_t disable_cmd_value[2] = {0x00, 0x00};
-  // this->send_command_(CMD_BLUETOOTH, enable ? enable_cmd_value : disable_cmd_value, 2);
   // this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
 }
 
@@ -341,18 +322,6 @@ void VentAxiaSentinelKineticComponent::set_distance_resolution(const std::string
   uint8_t cmd_value[2] = {DISTANCE_RESOLUTION_ENUM_TO_INT.at(state), 0x00};
   this->send_command_(CMD_SET_DISTANCE_RESOLUTION, cmd_value, 2);
   this->set_timeout(200, [this]() { this->restart_and_read_all_info(); });
-}
-
-void VentAxiaSentinelKineticComponent::set_bluetooth_password(const std::string &password) {
-  if (password.length() != 6) {
-    ESP_LOGE(TAG, "set_bluetooth_password(): invalid password length, must be exactly 6 chars '%s'", password.c_str());
-    return;
-  }
-  this->set_config_mode_(true);
-  uint8_t cmd_value[6];
-  std::copy(password.begin(), password.end(), std::begin(cmd_value));
-  this->send_command_(CMD_BT_PASSWORD, cmd_value, 6);
-  this->set_config_mode_(false);
 }
 
 void VentAxiaSentinelKineticComponent::factory_reset() {

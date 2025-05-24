@@ -48,7 +48,6 @@ static const uint16_t CMD_SET_LIGHT_CONTROL = 0x00AD;
 static const uint16_t CMD_BT_PASSWORD = 0x00A9;
 static const uint16_t CMD_RESET = 0x00A2;
 static const uint16_t CMD_RESTART = 0x00A3;
-static const uint16_t CMD_BLUETOOTH = 0x00A4;
 
 enum DistanceResolutionStructure : uint8_t { DISTANCE_RESOLUTION_0_2 = 0x01, DISTANCE_RESOLUTION_0_75 = 0x00 };
 
@@ -110,7 +109,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   SUB_SELECT(distance_resolution)
 #endif
 #ifdef USE_SWITCH
-  SUB_SWITCH(bluetooth)
   SUB_SWITCH(up)
   SUB_SWITCH(down)
   SUB_SWITCH(set)
@@ -139,10 +137,8 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void set_gate_still_sensor(int gate, sensor::Sensor *s);
 #endif
   void set_throttle(uint16_t value) { this->throttle_ = value; };
-  void set_bluetooth_password(const std::string &password);
   void read_all_info();
   void restart_and_read_all_info();
-  void set_bluetooth(bool enable);
   void set_up(bool enable);
   void set_down(bool enable);
   void set_set(bool enable);

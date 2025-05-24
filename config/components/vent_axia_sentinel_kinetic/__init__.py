@@ -53,28 +53,3 @@ CALIBRATION_ACTION_SCHEMA = maybe_simple_id(
         cv.Required(CONF_ID): cv.use_id(VentAxiaSentinelKineticComponent),
     }
 )
-
-
-# Actions
-BluetoothPasswordSetAction = vent_axia_sentinel_kinetic_ns.class_(
-    "BluetoothPasswordSetAction", automation.Action
-)
-
-
-BLUETOOTH_PASSWORD_SET_SCHEMA = cv.Schema(
-    {
-        cv.Required(CONF_ID): cv.use_id(VentAxiaSentinelKineticComponent),
-        cv.Required(CONF_PASSWORD): cv.templatable(cv.string_strict),
-    }
-)
-
-
-@automation.register_action(
-    "bluetooth_password.set", BluetoothPasswordSetAction, BLUETOOTH_PASSWORD_SET_SCHEMA
-)
-async def bluetooth_password_set_to_code(config, action_id, template_arg, args):
-    paren = await cg.get_variable(config[CONF_ID])
-    var = cg.new_Pvariable(action_id, template_arg, paren)
-    template_ = await cg.templatable(config[CONF_PASSWORD], args, cg.std_string)
-    cg.add(var.set_password(template_))
-    return var
