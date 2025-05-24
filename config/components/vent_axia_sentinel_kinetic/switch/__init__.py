@@ -11,19 +11,11 @@ from esphome.const import (
 from .. import CONF_VentAxiaSentinelKinetic_ID, VentAxiaSentinelKineticComponent, vent_axia_sentinel_kinetic_ns
 
 BluetoothSwitch = vent_axia_sentinel_kinetic_ns.class_("BluetoothSwitch", switch.Switch)
-EngineeringModeSwitch = vent_axia_sentinel_kinetic_ns.class_("EngineeringModeSwitch", switch.Switch)
 
-CONF_ENGINEERING_MODE = "engineering_mode"
 CONF_BLUETOOTH = "bluetooth"
 
 CONFIG_SCHEMA = {
     cv.GenerateID(CONF_VentAxiaSentinelKinetic_ID): cv.use_id(VentAxiaSentinelKineticComponent),
-    cv.Optional(CONF_ENGINEERING_MODE): switch.switch_schema(
-        EngineeringModeSwitch,
-        device_class=DEVICE_CLASS_SWITCH,
-        entity_category=ENTITY_CATEGORY_CONFIG,
-        icon=ICON_PULSE,
-    ),
     cv.Optional(CONF_BLUETOOTH): switch.switch_schema(
         BluetoothSwitch,
         device_class=DEVICE_CLASS_SWITCH,
@@ -35,10 +27,6 @@ CONFIG_SCHEMA = {
 
 async def to_code(config):
     vent_axia_sentinel_kinetic_component = await cg.get_variable(config[CONF_VentAxiaSentinelKinetic_ID])
-    if engineering_mode_config := config.get(CONF_ENGINEERING_MODE):
-        s = await switch.new_switch(engineering_mode_config)
-        await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])
-        cg.add(vent_axia_sentinel_kinetic_component.set_engineering_mode_switch(s))
     if bluetooth_config := config.get(CONF_BLUETOOTH):
         s = await switch.new_switch(bluetooth_config)
         await cg.register_parented(s, config[CONF_VentAxiaSentinelKinetic_ID])

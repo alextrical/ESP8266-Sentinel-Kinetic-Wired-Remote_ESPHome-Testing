@@ -98,8 +98,6 @@ sensor:
 
 switch:
   - platform: vent_axia_sentinel_kinetic
-    engineering_mode:
-      name: "engineering mode"
     bluetooth:
       name: "control bluetooth"
 

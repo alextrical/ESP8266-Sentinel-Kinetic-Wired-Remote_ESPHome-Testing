@@ -27,7 +27,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
   LOG_BINARY_SENSOR("  ", "OutPinPresenceStatusBinarySensor", this->out_pin_presence_status_binary_sensor_);
 #endif
 #ifdef USE_SWITCH
-  LOG_SWITCH("  ", "EngineeringModeSwitch", this->engineering_mode_switch_);
   LOG_SWITCH("  ", "BluetoothSwitch", this->bluetooth_switch_);
 #endif
 #ifdef USE_BUTTON
@@ -160,18 +159,6 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
     return;
   last_periodic_millis_ = current_millis;
 
-  /*
-    Data Type: 7th
-    0x01: Engineering mode
-    0x02: Normal mode
-  */
-  bool engineering_mode = buffer[DATA_TYPES] == 0x01;
-#ifdef USE_SWITCH
-  if (this->engineering_mode_switch_ != nullptr &&
-      current_millis - last_engineering_mode_change_millis_ > this->throttle_) {
-    this->engineering_mode_switch_->publish_state(engineering_mode);
-  }
-#endif
 #ifdef USE_BINARY_SENSOR
   /*
     Target states: 9th
@@ -224,60 +211,23 @@ void VentAxiaSentinelKineticComponent::handle_periodic_data_(uint8_t *buffer, in
     if (this->detection_distance_sensor_->get_state() != new_detect_distance)
       this->detection_distance_sensor_->publish_state(new_detect_distance);
   }
-  if (engineering_mode) {
-    /*
-      Moving distance range: 18th byte
-      Still distance range: 19th byte
-      Moving enery: 20~28th bytes
-    */
-    for (std::vector<sensor::Sensor *>::size_type i = 0; i != this->gate_move_sensors_.size(); i++) {
-      sensor::Sensor *s = this->gate_move_sensors_[i];
-      if (s != nullptr) {
-        s->publish_state(buffer[MOVING_SENSOR_START + i]);
-      }
+  for (auto *s : this->gate_move_sensors_) {
+    if (s != nullptr && !std::isnan(s->get_state())) {
+      s->publish_state(NAN);
     }
-    /*
-      Still energy: 29~37th bytes
-    */
-    for (std::vector<sensor::Sensor *>::size_type i = 0; i != this->gate_still_sensors_.size(); i++) {
-      sensor::Sensor *s = this->gate_still_sensors_[i];
-      if (s != nullptr) {
-        s->publish_state(buffer[STILL_SENSOR_START + i]);
-      }
+  }
+  for (auto *s : this->gate_still_sensors_) {
+    if (s != nullptr && !std::isnan(s->get_state())) {
+      s->publish_state(NAN);
     }
-    /*
-      Light sensor: 38th bytes
-    */
-    if (this->light_sensor_ != nullptr) {
-      int new_light_sensor = buffer[LIGHT_SENSOR];
-      if (this->light_sensor_->get_state() != new_light_sensor)
-        this->light_sensor_->publish_state(new_light_sensor);
-    }
-  } else {
-    for (auto *s : this->gate_move_sensors_) {
-      if (s != nullptr && !std::isnan(s->get_state())) {
-        s->publish_state(NAN);
-      }
-    }
-    for (auto *s : this->gate_still_sensors_) {
-      if (s != nullptr && !std::isnan(s->get_state())) {
-        s->publish_state(NAN);
-      }
-    }
-    if (this->light_sensor_ != nullptr && !std::isnan(this->light_sensor_->get_state())) {
-      this->light_sensor_->publish_state(NAN);
-    }
+  }
+  if (this->light_sensor_ != nullptr && !std::isnan(this->light_sensor_->get_state())) {
+    this->light_sensor_->publish_state(NAN);
   }
 #endif
 #ifdef USE_BINARY_SENSOR
-  if (engineering_mode) {
-    if (this->out_pin_presence_status_binary_sensor_ != nullptr) {
-      this->out_pin_presence_status_binary_sensor_->publish_state(buffer[OUT_PIN_SENSOR] == 0x01);
-    }
-  } else {
-    if (this->out_pin_presence_status_binary_sensor_ != nullptr) {
-      this->out_pin_presence_status_binary_sensor_->publish_state(false);
-    }
+  if (this->out_pin_presence_status_binary_sensor_ != nullptr) {
+    this->out_pin_presence_status_binary_sensor_->publish_state(false);
   }
 #endif
 }
@@ -541,14 +491,6 @@ void VentAxiaSentinelKineticComponent::set_bluetooth_password(const std::string 
   uint8_t cmd_value[6];
   std::copy(password.begin(), password.end(), std::begin(cmd_value));
   this->send_command_(CMD_BT_PASSWORD, cmd_value, 6);
-  this->set_config_mode_(false);
-}
-
-void VentAxiaSentinelKineticComponent::set_engineering_mode(bool enable) {
-  this->set_config_mode_(true);
-  last_engineering_mode_change_millis_ = millis();
-  uint8_t cmd = enable ? CMD_ENABLE_ENG : CMD_DISABLE_ENG;
-  this->send_command_(cmd, nullptr, 0);
   this->set_config_mode_(false);
 }
 

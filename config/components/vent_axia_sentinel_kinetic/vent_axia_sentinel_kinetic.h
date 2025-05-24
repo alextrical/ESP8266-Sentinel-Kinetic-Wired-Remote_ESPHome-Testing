@@ -162,7 +162,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   SUB_SELECT(out_pin_level)
 #endif
 #ifdef USE_SWITCH
-  SUB_SWITCH(engineering_mode)
   SUB_SWITCH(bluetooth)
 #endif
 #ifdef USE_BUTTON
@@ -195,7 +194,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
   void set_throttle(uint16_t value) { this->throttle_ = value; };
   void set_bluetooth_password(const std::string &password);
-  void set_engineering_mode(bool enable);
   void read_all_info();
   void restart_and_read_all_info();
   void set_bluetooth(bool enable);
@@ -218,7 +216,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
   void restart_();
 
   int32_t last_periodic_millis_ = millis();
-  int32_t last_engineering_mode_change_millis_ = millis();
   uint16_t throttle_;
   std::string version_;
   std::string mac_;
