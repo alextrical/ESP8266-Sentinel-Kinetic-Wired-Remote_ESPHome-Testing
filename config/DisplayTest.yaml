@@ -59,8 +59,6 @@ button:
     #   name: "Down Button"
     factory_reset:
       name: "factory reset"
-    query_params:
-      name: query params
 
 text_sensor:
   - platform: vent_axia_sentinel_kinetic
