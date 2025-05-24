@@ -74,8 +74,6 @@ text_sensor:
   - platform: vent_axia_sentinel_kinetic
     version:
       name: "firmware version"
-    mac_address:
-      name: "mac address"
 
 select:
   - platform: vent_axia_sentinel_kinetic
