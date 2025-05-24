@@ -60,8 +60,6 @@ number:
       name: timeout
     light_threshold:
       name: light threshold
-    max_move_distance_gate:
-      name: max move distance gate
     max_still_distance_gate:
       name: max still distance gate
 

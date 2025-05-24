@@ -170,7 +170,6 @@ class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevi
 #endif
 #ifdef USE_NUMBER
   SUB_NUMBER(max_still_distance_gate)
-  SUB_NUMBER(max_move_distance_gate)
   SUB_NUMBER(timeout)
   SUB_NUMBER(light_threshold)
 #endif

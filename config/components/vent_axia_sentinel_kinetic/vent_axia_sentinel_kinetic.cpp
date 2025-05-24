@@ -60,7 +60,6 @@ void VentAxiaSentinelKineticComponent::dump_config() {
 #ifdef USE_NUMBER
   LOG_NUMBER("  ", "LightThresholdNumber", this->light_threshold_number_);
   LOG_NUMBER("  ", "MaxStillDistanceGateNumber", this->max_still_distance_gate_number_);
-  LOG_NUMBER("  ", "MaxMoveDistanceGateNumber", this->max_move_distance_gate_number_);
   LOG_NUMBER("  ", "TimeoutNumber", this->timeout_number_);
 #endif
   this->read_all_info();
@@ -370,7 +369,6 @@ bool VentAxiaSentinelKineticComponent::handle_ack_data_(uint8_t *buffer, int len
         Still distance range: 14th byte
       */
       std::vector<std::function<void(void)>> updates;
-      updates.push_back(set_number_value(this->max_move_distance_gate_number_, buffer[12]));
       updates.push_back(set_number_value(this->max_still_distance_gate_number_, buffer[13]));
       /*
         None Duration: 33~34th bytes
@@ -469,17 +467,10 @@ void VentAxiaSentinelKineticComponent::get_light_control_() { this->send_command
 
 #ifdef USE_NUMBER
 void VentAxiaSentinelKineticComponent::set_max_distances_timeout() {
-  if (!this->max_move_distance_gate_number_->has_state() || !this->max_still_distance_gate_number_->has_state() ||
-      !this->timeout_number_->has_state()) {
-    return;
-  }
-  int max_moving_distance_gate_range = static_cast<int>(this->max_move_distance_gate_number_->state);
   int max_still_distance_gate_range = static_cast<int>(this->max_still_distance_gate_number_->state);
   int timeout = static_cast<int>(this->timeout_number_->state);
   uint8_t value[18] = {0x00,
                        0x00,
-                       lowbyte(max_moving_distance_gate_range),
-                       highbyte(max_moving_distance_gate_range),
                        0x00,
                        0x00,
                        0x01,
