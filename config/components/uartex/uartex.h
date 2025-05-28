@@ -16,10 +16,6 @@ enum ERROR {
     ERROR_RX_TIMEOUT
 };
 
-enum CHECKSUM {
-    CHECKSUM_SUBTRACT
-};
-
 struct header_t
 {
     std::vector<uint8_t> data;
@@ -57,7 +53,6 @@ protected:
 
 protected:
     std::vector<UARTExDevice *> devices_{};
-    CHECKSUM rx_checksum_2_{CHECKSUM_SUBTRACT};
     CallbackManager<void(const uint8_t *data, const uint16_t len)> read_callback_{};
     ERROR error_code_{ERROR_NONE};
     CallbackManager<void(const ERROR)> error_callback_{};

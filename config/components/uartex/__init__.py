@@ -30,16 +30,10 @@ uint8_ptr_const = uint8_const.operator('ptr')
 ReadTrigger = uartex_ns.class_("ReadTrigger", automation.Trigger.template())
 
 MULTI_CONF = True
-Checksum = uartex_ns.enum("CHECKSUM")
-CHECKSUMS = {
-    "SUBTRACT": Checksum.CHECKSUM_SUBTRACT,
-}
 
 def validate_checksum(value):
     if cg.is_template(value):
         return cv.returning_lambda(value)
-    if isinstance(value, str):
-        return cv.enum(CHECKSUMS, upper=True)(value)
     raise cv.Invalid("data type error")
 
 Endian = uartex_ns.enum("ENDIAN")
