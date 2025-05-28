@@ -188,14 +188,6 @@ async def to_code(config):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(trigger, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], conf)
 
-    if CONF_RX_CHECKSUM_2 in config:
-        data = config[CONF_RX_CHECKSUM_2]
-        if cg.is_template(data):
-            template_ = await cg.templatable(data, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], vector_uint8)
-            cg.add(var.set_rx_checksum_2(template_))
-        else:
-            cg.add(var.set_rx_checksum_2(data))
-
     if CONF_ON_WRITE in config:
         data = config[CONF_ON_WRITE]
         if cg.is_template(data):

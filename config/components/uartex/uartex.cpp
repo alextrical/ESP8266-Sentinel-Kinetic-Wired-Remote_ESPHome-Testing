@@ -156,11 +156,6 @@ void UARTExComponent::publish_log(std::string msg)
     }
 }
 
-void UARTExComponent::set_rx_checksum_2(CHECKSUM checksum)
-{
-    this->rx_checksum_2_ = checksum;
-}
-
 std::vector<uint8_t> UARTExComponent::get_rx_checksum(const std::vector<uint8_t> &data, const std::vector<uint8_t> &header)
 {
     uint16_t crc = get_checksum(header, data);

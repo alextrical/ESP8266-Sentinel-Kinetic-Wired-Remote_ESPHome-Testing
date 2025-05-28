@@ -30,8 +30,6 @@ class UARTExComponent : public uart::UARTDevice, public Component
 {
 public:
     UARTExComponent() = default;
-    void set_rx_checksum_2(CHECKSUM checksum);
-    void set_rx_checksum_2(std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)> &&f);
     void set_version(text_sensor::TextSensor *version) { this->version_ = version; }
     void set_error(text_sensor::TextSensor *error) { this->error_ = error; }
     void set_log(text_sensor::TextSensor *log) { this->log_ = log; }
