@@ -23,7 +23,6 @@ void UARTExComponent::setup()
     if (this->rx_header_.has_value())
     {
         this->rx_parser_.add_headers(this->rx_header_.value().data);
-        this->rx_parser_.add_header_masks(this->rx_header_.value().mask);
     }
     if (this->rx_footer_.has_value()) this->rx_parser_.add_footers(this->rx_footer_.value());
     this->rx_parser_.set_total_len(this->conf_rx_length_);

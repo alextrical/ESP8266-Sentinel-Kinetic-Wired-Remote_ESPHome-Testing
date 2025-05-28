@@ -23,19 +23,6 @@ bool Parser::add_headers(const std::vector<unsigned char>& header)
     return true;
 }
 
-bool Parser::add_header_mask(const unsigned char mask)
-{
-    header_mask_.push_back(mask);
-    return true;
-}
-
-bool Parser::add_header_masks(const std::vector<unsigned char>& mask)
-{
-    if (mask.empty()) return false;
-    header_mask_.insert(header_mask_.end(), mask.begin(), mask.end());
-    return true;
-}
-
 bool Parser::add_footer(const unsigned char footer)
 {
     footer_.push_back(footer);
