@@ -12,15 +12,13 @@ static const char *TAG = "vent_axia_sentinel_kinetic.component";
 void VentAxiaSentinelKineticComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up VentAxiaSentinelKinetic...");
   this->send_alive_str_();
-//   ESP_LOGCONFIG(TAG, "Mac Address : %s", const_cast<char *>(this->mac_.c_str()));
-//   ESP_LOGCONFIG(TAG, "Firmware Version : %s", const_cast<char *>(this->version_.c_str()));
   ESP_LOGCONFIG(TAG, "VentAxiaSentinelKinetic setup complete.");
 }
 
 void VentAxiaSentinelKineticComponent::loop() {
-  int32_t current_millis = millis();
-  if (current_millis - last_periodic_millis_ >= 26){
-    last_periodic_millis_ = current_millis;
+  int32_t now = millis();
+  if (now - last_periodic_millis_ >= 26){
+    last_periodic_millis_ = now;
     if (CMD_KEY_DATA != 0)
       this->send_command_(CMD_KEY_HEADER, 4, CMD_KEY_DATA);
   }
