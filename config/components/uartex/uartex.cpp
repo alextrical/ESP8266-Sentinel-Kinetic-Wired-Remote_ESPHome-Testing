@@ -16,7 +16,7 @@ void UARTExComponent::dump_config()
 
 void UARTExComponent::setup()
 {
-    if (this->rx_checksum_2_ != CHECKSUM_NONE) this->rx_parser_.set_checksum_len(2);
+    this->rx_parser_.set_checksum_len(2);
     this->rx_time_ = get_time();
     this->rx_parser_.add_headers(std::vector<unsigned char>{0x02});
     if (this->rx_footer_.has_value()) this->rx_parser_.add_footers(this->rx_footer_.value());
@@ -117,13 +117,9 @@ ERROR UARTExComponent::validate_data()
     {
         return ERROR_FOOTER;
     }
-    if ((this->rx_checksum_2_ != CHECKSUM_NONE) && !this->rx_parser_.verify_checksum(get_rx_checksum(data, this->rx_parser_.header())))
+    if (!this->rx_parser_.verify_checksum(get_rx_checksum(data, this->rx_parser_.header())))
     {
         return ERROR_CHECKSUM;
-    }
-    if (!this->rx_footer_.has_value() && this->conf_rx_length_ == 0 && this->rx_checksum_2_ == CHECKSUM_NONE)
-    {
-        return ERROR_RX_TIMEOUT;
     }
     return ERROR_NONE;
 }
@@ -202,12 +198,6 @@ void UARTExComponent::set_rx_checksum_2(CHECKSUM checksum)
     this->rx_checksum_2_ = checksum;
 }
 
-void UARTExComponent::set_rx_checksum_2(std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)> &&f)
-{
-    this->rx_checksum_f_2_ = f;
-    this->rx_checksum_2_ = CHECKSUM_CUSTOM;
-}
-
 std::vector<uint8_t> UARTExComponent::get_rx_checksum(const std::vector<uint8_t> &data, const std::vector<uint8_t> &header)
 {
     if (this->rx_checksum_f_2_.has_value())
@@ -216,11 +206,8 @@ std::vector<uint8_t> UARTExComponent::get_rx_checksum(const std::vector<uint8_t>
     }
     else
     {
-        if (this->rx_checksum_2_ != CHECKSUM_NONE)
-        {
-            uint16_t crc = get_checksum(this->rx_checksum_2_, header, data);
-            return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
-        }
+        uint16_t crc = get_checksum(this->rx_checksum_2_, header, data);
+        return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
     }
     return {};
 }
@@ -231,17 +218,10 @@ uint16_t UARTExComponent::get_checksum(CHECKSUM checksum, const std::vector<uint
     uint8_t temp = 0;
     switch(checksum)
     {
-    case CHECKSUM_ADD:
-        for (uint8_t byte : header) { crc += byte; }
-        for (uint8_t byte : data) { crc += byte; }
-        break;
     case CHECKSUM_SUBTRACT:
         crc = 0xFFFF;
         for (uint8_t byte : header) { crc -= byte; }
         for (uint8_t byte : data) { crc -= byte; }
-        break;
-    case CHECKSUM_NONE:
-    case CHECKSUM_CUSTOM:
         break;
     }
     return crc;

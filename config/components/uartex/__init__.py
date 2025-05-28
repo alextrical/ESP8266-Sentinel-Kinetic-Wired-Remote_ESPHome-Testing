@@ -35,8 +35,6 @@ ReadTrigger = uartex_ns.class_("ReadTrigger", automation.Trigger.template())
 MULTI_CONF = True
 Checksum = uartex_ns.enum("CHECKSUM")
 CHECKSUMS = {
-    "NONE": Checksum.CHECKSUM_NONE,
-    "ADD": Checksum.CHECKSUM_ADD,
     "SUBTRACT": Checksum.CHECKSUM_SUBTRACT,
 }
 

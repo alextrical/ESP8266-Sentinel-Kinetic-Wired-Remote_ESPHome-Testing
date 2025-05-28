@@ -28,7 +28,7 @@ external_components:
 
 uartex:
   rx_timeout: 10ms
-  rx_checksum2: SUBTRACT
+  # rx_checksum2: SUBTRACT
   # rx_checksum2: !lambda |-
   #   uint16_t crc = 0xFFFF - 0x02;
   #   for (int i = 0; i < len; i++) crc -= data[i];
