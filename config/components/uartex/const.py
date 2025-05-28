@@ -2,7 +2,6 @@
 """Constants used by esphome."""
 
 CONF_UARTEX_ID = 'uartex_id'
-CONF_RX_TIMEOUT = 'rx_timeout'
 CONF_RX_CHECKSUM_2 = 'rx_checksum2'
 CONF_MASK = 'mask'
 CONF_ERROR = 'error'

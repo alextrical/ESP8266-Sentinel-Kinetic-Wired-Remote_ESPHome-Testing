@@ -10,7 +10,6 @@ external_components:
 packet) 0x02 0x01 0x00 0x00 0x00 (add)checksum 0x0D 0x0A
 
 uartex:
-  rx_timeout: 10ms
   tx_delay: 50ms
   tx_timeout: 500ms
   tx_retry_cnt: 3
@@ -31,7 +30,6 @@ uartex:
     disabled: False
 ```
 ### Configuration variables
-- rx_timeout (Optional, Time): Data Receive Timeout. Defaults to 10ms. Max 2000ms
 - rx_length (Optional, int): The length of the received data when the data length is fixed. Max 256
 - tx_delay (Optional, Time): Data Send Delay. Defaults to 50ms. Max 2000ms
 - tx_timeout (Optional, Time): ACK Reception Timeout. Defaults to 50ms. Max 2000ms

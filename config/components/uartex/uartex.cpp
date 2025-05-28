@@ -6,7 +6,6 @@ static const char *TAG = "uartex";
 void UARTExComponent::dump_config()
 {
 #ifdef ESPHOME_LOG_HAS_DEBUG
-    log_config(TAG, "rx_timeout", this->conf_rx_timeout_);
     log_config(TAG, "rx_checksum2", (uint16_t)this->rx_checksum_2_);
     log_config(TAG, "uartex count", (uint16_t)this->devices_.size());
 #endif
@@ -35,7 +34,7 @@ void UARTExComponent::read_from_uart()
     this->rx_parser_.clear();
     if (!this->available()) return;
     unsigned long timer = get_time();
-    while (elapsed_time(timer) < this->conf_rx_timeout_)
+    while (elapsed_time(timer) < 10)
     {
         while (this->available())
         {
@@ -87,11 +86,6 @@ void UARTExComponent::write_flush()
 void UARTExComponent::register_device(UARTExDevice *device)
 {
     this->devices_.push_back(device);
-}
-
-void UARTExComponent::set_rx_timeout(uint16_t timeout)
-{
-    this->conf_rx_timeout_ = timeout;
 }
 
 ERROR UARTExComponent::validate_data()

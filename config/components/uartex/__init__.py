@@ -11,7 +11,7 @@ from .const import CONF_RX_CHECKSUM_2, \
     CONF_ACK, CONF_ON_WRITE, CONF_ON_READ, \
     CONF_STATE, CONF_MASK, \
     CONF_STATE_ON, CONF_STATE_OFF, CONF_COMMAND_ON, CONF_COMMAND_OFF, \
-    CONF_COMMAND_UPDATE, CONF_RX_TIMEOUT, \
+    CONF_COMMAND_UPDATE, \
     CONF_STATE_RESPONSE, CONF_LENGTH, CONF_PRECISION, \
     CONF_DISABLED, CONF_ASCII, CONF_SIGNED, CONF_ENDIAN, CONF_DECODE
 
@@ -125,10 +125,6 @@ def command_hex_schema(value):
 # UARTEx Schema
 CONFIG_SCHEMA = cv.All(cv.Schema({
     cv.GenerateID(): cv.declare_id(UARTExComponent),
-    cv.Optional(CONF_RX_TIMEOUT, default="10ms"): cv.All(
-        cv.positive_time_period_milliseconds,
-        cv.Range(max=core.TimePeriod(milliseconds=2000)),
-    ),
     cv.Optional(CONF_ON_READ): automation.validate_automation(
         {
             cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ReadTrigger),
@@ -183,9 +179,6 @@ async def to_code(config):
             await register_text_sensor(sens, config[CONF_LOG])
             cg.add(var.set_log(sens))
             cg.add(var.set_log_ascii(config[CONF_LOG][CONF_ASCII]))
-
-    if CONF_RX_TIMEOUT in config:
-        cg.add(var.set_rx_timeout(config[CONF_RX_TIMEOUT]))
 
     for conf in config.get(CONF_ON_WRITE, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
