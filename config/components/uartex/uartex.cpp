@@ -8,7 +8,6 @@ void UARTExComponent::dump_config()
 #ifdef ESPHOME_LOG_HAS_DEBUG
     log_config(TAG, "rx_timeout", this->conf_rx_timeout_);
     log_config(TAG, "rx_length", this->conf_rx_length_);
-    if (this->rx_footer_.has_value()) log_config(TAG, "rx_footer", this->rx_footer_.value());
     log_config(TAG, "rx_checksum2", (uint16_t)this->rx_checksum_2_);
     log_config(TAG, "uartex count", (uint16_t)this->devices_.size());
 #endif
@@ -19,7 +18,6 @@ void UARTExComponent::setup()
     this->rx_parser_.set_checksum_len(2);
     this->rx_time_ = get_time();
     this->rx_parser_.add_headers(std::vector<unsigned char>{0x02});
-    if (this->rx_footer_.has_value()) this->rx_parser_.add_footers(this->rx_footer_.value());
     this->rx_parser_.set_total_len(this->conf_rx_length_);
     if (this->error_) this->error_->publish_state("None");
     if (this->version_) this->version_->publish_state(UARTEX_VERSION);
@@ -113,10 +111,6 @@ ERROR UARTExComponent::validate_data()
     {
         return ERROR_SIZE;
     }
-    if (this->rx_footer_.has_value() && this->rx_parser_.parse_footer() == false)
-    {
-        return ERROR_FOOTER;
-    }
     if (!this->rx_parser_.verify_checksum(get_rx_checksum(data, this->rx_parser_.header())))
     {
         return ERROR_CHECKSUM;
@@ -144,10 +138,6 @@ bool UARTExComponent::publish_error(ERROR error_code)
     case ERROR_HEADER:
         ESP_LOGW(TAG, "[Read] Header error: %s", to_hex_string(this->rx_parser_.buffer()).c_str());
         if (this->error_ && this->error_code_ != ERROR_HEADER) this->error_->publish_state("Header Error");
-        break;
-    case ERROR_FOOTER:
-        ESP_LOGW(TAG, "[Read] Footer error: %s", to_hex_string(this->rx_parser_.buffer()).c_str());
-        if (this->error_ && this->error_code_ != ERROR_FOOTER) this->error_->publish_state("Footer Error");
         break;
     case ERROR_CHECKSUM:
         ESP_LOGW(TAG, "[Read] Checksum error: %s", to_hex_string(this->rx_parser_.buffer()).c_str());
@@ -186,11 +176,6 @@ void UARTExComponent::publish_log(std::string msg)
         this->last_log_ = msg;
         this->log_->publish_state(msg);
     }
-}
-
-void UARTExComponent::set_rx_footer(std::vector<uint8_t> footer)
-{
-    this->rx_footer_ = footer;
 }
 
 void UARTExComponent::set_rx_checksum_2(CHECKSUM checksum)

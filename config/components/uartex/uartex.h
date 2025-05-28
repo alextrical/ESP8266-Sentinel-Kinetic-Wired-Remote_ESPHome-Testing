@@ -12,7 +12,6 @@ enum ERROR {
     ERROR_NONE,
     ERROR_SIZE,
     ERROR_HEADER,
-    ERROR_FOOTER,
     ERROR_CHECKSUM,
     ERROR_RX_TIMEOUT
 };
@@ -31,7 +30,6 @@ class UARTExComponent : public uart::UARTDevice, public Component
 {
 public:
     UARTExComponent() = default;
-    void set_rx_footer(std::vector<uint8_t> footer);
     void set_rx_checksum_2(CHECKSUM checksum);
     void set_rx_checksum_2(std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)> &&f);
     void set_version(text_sensor::TextSensor *version) { this->version_ = version; }
@@ -66,7 +64,6 @@ protected:
     std::vector<UARTExDevice *> devices_{};
     uint16_t conf_rx_timeout_{10};
     uint16_t conf_rx_length_{0};
-    optional<std::vector<uint8_t>> rx_footer_{};
     CHECKSUM rx_checksum_2_{CHECKSUM_SUBTRACT};
     optional<std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)>> rx_checksum_f_2_{};
     CallbackManager<void(const uint8_t *data, const uint16_t len)> read_callback_{};

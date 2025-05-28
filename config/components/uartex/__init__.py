@@ -6,8 +6,7 @@ from esphome import automation, pins, core
 from esphome.const import CONF_ID, CONF_OFFSET, CONF_DATA, CONF_TRIGGER_ID, \
     CONF_INVERTED, CONF_VERSION, CONF_NAME, CONF_OPTIMISTIC, CONF_ICON, CONF_ENTITY_CATEGORY, ICON_NEW_BOX
 from esphome.util import SimpleRegistry
-from .const import CONF_RX_FOOTER, \
-    CONF_RX_CHECKSUM_2, \
+from .const import CONF_RX_CHECKSUM_2, \
     CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
     CONF_ACK, CONF_ON_WRITE, CONF_ON_READ, \
     CONF_STATE, CONF_MASK, \
@@ -136,7 +135,6 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
         }
     ),
     cv.Optional(CONF_RX_LENGTH): cv.int_range(min=1, max=256),
-    cv.Optional(CONF_RX_FOOTER): validate_hex_data,
     cv.Optional(CONF_RX_CHECKSUM_2): validate_checksum,
     cv.Optional(CONF_VERSION): text_sensor.text_sensor_schema(text_sensor.TextSensor).extend(
     {
@@ -200,9 +198,6 @@ async def to_code(config):
 
     if CONF_RX_LENGTH in config:
         cg.add(var.set_rx_length(config[CONF_RX_LENGTH]))
-
-    if CONF_RX_FOOTER in config:
-        cg.add(var.set_rx_footer(config[CONF_RX_FOOTER]))
 
     if CONF_RX_CHECKSUM_2 in config:
         data = config[CONF_RX_CHECKSUM_2]
