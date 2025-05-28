@@ -20,10 +20,7 @@ void UARTExComponent::setup()
 {
     if (this->rx_checksum_2_ != CHECKSUM_NONE) this->rx_parser_.set_checksum_len(2);
     this->rx_time_ = get_time();
-    if (this->rx_header_.has_value())
-    {
-        this->rx_parser_.add_headers(this->rx_header_.value().data);
-    }
+    this->rx_parser_.add_headers(std::vector<unsigned char>{0x02});
     if (this->rx_footer_.has_value()) this->rx_parser_.add_footers(this->rx_footer_.value());
     this->rx_parser_.set_total_len(this->conf_rx_length_);
     if (this->error_) this->error_->publish_state("None");
