@@ -38,7 +38,6 @@ public:
     void loop() override;
     float get_setup_priority() const override { return setup_priority::BUS - 1.0f; }
     void register_device(UARTExDevice *device);
-    void write_command(cmd_t cmd);
 
 protected:
     ERROR validate_data();

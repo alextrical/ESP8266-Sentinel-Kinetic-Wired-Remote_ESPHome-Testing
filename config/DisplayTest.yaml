@@ -48,6 +48,14 @@ external_components:
   - source: components #Make sure there is a folder named components/vent_axia_sentinel_kinetic at the same location as this YAML
 
 vent_axia_sentinel_kinetic:
+# uartex:
+
+# text_sensor:
+#   # Raw string from UART (read once)
+#   - platform: uartex
+#     name: LCD_RAW
+#     id: "lcd_raw"
+#     lambda: 'return std::string(reinterpret_cast<const char*>(data + 5), 33);'
 
 switch:
   - platform: vent_axia_sentinel_kinetic
