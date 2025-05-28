@@ -237,8 +237,8 @@ uint16_t UARTExComponent::get_checksum(CHECKSUM checksum, const std::vector<uint
         break;
     case CHECKSUM_SUBTRACT:
         crc = 0xFFFF;
-        for (uint8_t byte : header) { crc += byte; }
-        for (uint8_t byte : data) { crc += byte; }
+        for (uint8_t byte : header) { crc -= byte; }
+        for (uint8_t byte : data) { crc -= byte; }
         break;
     case CHECKSUM_NONE:
     case CHECKSUM_CUSTOM:
