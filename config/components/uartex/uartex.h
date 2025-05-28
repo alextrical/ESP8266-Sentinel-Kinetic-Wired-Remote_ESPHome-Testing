@@ -39,8 +39,6 @@ public:
     UARTExComponent() = default;
     void set_rx_header(header_t header);
     void set_rx_footer(std::vector<uint8_t> footer);
-    void set_rx_checksum(CHECKSUM checksum);
-    void set_rx_checksum(std::function<uint8_t(const uint8_t *data, const uint16_t len)> &&f);
     void set_rx_checksum_2(CHECKSUM checksum);
     void set_rx_checksum_2(std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)> &&f);
     void set_version(text_sensor::TextSensor *version) { this->version_ = version; }
@@ -78,8 +76,6 @@ protected:
     uint16_t conf_rx_length_{0};
     optional<header_t> rx_header_{};
     optional<std::vector<uint8_t>> rx_footer_{};
-    CHECKSUM rx_checksum_{CHECKSUM_NONE};
-    optional<std::function<uint8_t(const uint8_t *data, const uint16_t len)>> rx_checksum_f_{};
     CHECKSUM rx_checksum_2_{CHECKSUM_NONE};
     optional<std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)>> rx_checksum_f_2_{};
     CallbackManager<void(const uint8_t *data, const uint16_t len)> write_callback_{};

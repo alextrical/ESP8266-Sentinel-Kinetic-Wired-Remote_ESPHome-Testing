@@ -11,7 +11,6 @@ void UARTExComponent::dump_config()
     if (this->rx_header_.has_value()) log_config(TAG, "rx_header", this->rx_header_.value().data);
     if (this->rx_header_.has_value()) log_config(TAG, "rx_header mask", this->rx_header_.value().mask);
     if (this->rx_footer_.has_value()) log_config(TAG, "rx_footer", this->rx_footer_.value());
-    log_config(TAG, "rx_checksum", (uint16_t)this->rx_checksum_);
     log_config(TAG, "rx_checksum2", (uint16_t)this->rx_checksum_2_);
     log_config(TAG, "uartex count", (uint16_t)this->devices_.size());
 #endif
@@ -19,7 +18,6 @@ void UARTExComponent::dump_config()
 
 void UARTExComponent::setup()
 {
-    if (this->rx_checksum_ != CHECKSUM_NONE) this->rx_parser_.set_checksum_len(1);
     if (this->rx_checksum_2_ != CHECKSUM_NONE) this->rx_parser_.set_checksum_len(2);
     this->rx_time_ = get_time();
     if (this->rx_header_.has_value())
@@ -129,11 +127,11 @@ ERROR UARTExComponent::validate_data()
     {
         return ERROR_FOOTER;
     }
-    if ((this->rx_checksum_ != CHECKSUM_NONE || this->rx_checksum_2_ != CHECKSUM_NONE) && !this->rx_parser_.verify_checksum(get_rx_checksum(data, this->rx_parser_.header())))
+    if ((this->rx_checksum_2_ != CHECKSUM_NONE) && !this->rx_parser_.verify_checksum(get_rx_checksum(data, this->rx_parser_.header())))
     {
         return ERROR_CHECKSUM;
     }
-    if (!this->rx_footer_.has_value() && this->conf_rx_length_ == 0 && this->rx_checksum_ == CHECKSUM_NONE && this->rx_checksum_2_ == CHECKSUM_NONE)
+    if (!this->rx_footer_.has_value() && this->conf_rx_length_ == 0 && this->rx_checksum_2_ == CHECKSUM_NONE)
     {
         return ERROR_RX_TIMEOUT;
     }
@@ -214,17 +212,6 @@ void UARTExComponent::set_rx_footer(std::vector<uint8_t> footer)
     this->rx_footer_ = footer;
 }
 
-void UARTExComponent::set_rx_checksum(CHECKSUM checksum)
-{
-    this->rx_checksum_ = checksum;
-}
-
-void UARTExComponent::set_rx_checksum(std::function<uint8_t(const uint8_t *data, const uint16_t len)> &&f)
-{
-    this->rx_checksum_f_ = f;
-    this->rx_checksum_ = CHECKSUM_CUSTOM;
-}
-
 void UARTExComponent::set_rx_checksum_2(CHECKSUM checksum)
 {
     this->rx_checksum_2_ = checksum;
@@ -238,23 +225,13 @@ void UARTExComponent::set_rx_checksum_2(std::function<std::vector<uint8_t>(const
 
 std::vector<uint8_t> UARTExComponent::get_rx_checksum(const std::vector<uint8_t> &data, const std::vector<uint8_t> &header)
 {
-    if (this->rx_checksum_f_.has_value())
-    {
-        uint8_t crc = (*this->rx_checksum_f_)(&data[0], data.size());
-        return { crc };
-    }
-    else if (this->rx_checksum_f_2_.has_value())
+    if (this->rx_checksum_f_2_.has_value())
     {
         return (*this->rx_checksum_f_2_)(&data[0], data.size());
     }
     else
     {
-        if (this->rx_checksum_ != CHECKSUM_NONE)
-        {
-            uint8_t crc = get_checksum(this->rx_checksum_, header, data) & 0xFF;
-            return { crc };
-        }
-        else if (this->rx_checksum_2_ != CHECKSUM_NONE)
+        if (this->rx_checksum_2_ != CHECKSUM_NONE)
         {
             uint16_t crc = get_checksum(this->rx_checksum_2_, header, data);
             return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };

@@ -7,7 +7,7 @@ from esphome.const import CONF_ID, CONF_OFFSET, CONF_DATA, CONF_TRIGGER_ID, \
     CONF_INVERTED, CONF_VERSION, CONF_NAME, CONF_OPTIMISTIC, CONF_ICON, CONF_ENTITY_CATEGORY, ICON_NEW_BOX
 from esphome.util import SimpleRegistry
 from .const import CONF_RX_HEADER, CONF_RX_FOOTER, \
-    CONF_RX_CHECKSUM, CONF_RX_CHECKSUM_2, \
+    CONF_RX_CHECKSUM_2, \
     CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
     CONF_ACK, CONF_ON_WRITE, CONF_ON_READ, \
     CONF_STATE, CONF_MASK, \
@@ -149,7 +149,6 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
     cv.Optional(CONF_RX_LENGTH): cv.int_range(min=1, max=256),
     cv.Optional(CONF_RX_HEADER): header_schema,
     cv.Optional(CONF_RX_FOOTER): validate_hex_data,
-    cv.Optional(CONF_RX_CHECKSUM): validate_checksum,
     cv.Optional(CONF_RX_CHECKSUM_2): validate_checksum,
     cv.Optional(CONF_VERSION): text_sensor.text_sensor_schema(text_sensor.TextSensor).extend(
     {
@@ -173,7 +172,7 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
         cv.Optional(CONF_DISABLED, default=False): cv.boolean,
         cv.Optional(CONF_ASCII, default=False): cv.boolean,
     }),
-}).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA), cv.has_at_most_one_key(CONF_RX_CHECKSUM, CONF_RX_CHECKSUM_2))
+}).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA), cv.has_at_most_one_key(CONF_RX_CHECKSUM_2))
 
 async def to_code(config):
     cg.add_global(uartex_ns.using)
@@ -220,14 +219,6 @@ async def to_code(config):
 
     if CONF_RX_FOOTER in config:
         cg.add(var.set_rx_footer(config[CONF_RX_FOOTER]))
-
-    if CONF_RX_CHECKSUM in config:
-        data = config[CONF_RX_CHECKSUM]
-        if cg.is_template(data):
-            template_ = await cg.templatable(data, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], cg.uint8)
-            cg.add(var.set_rx_checksum(template_))
-        else:
-            cg.add(var.set_rx_checksum(data))
 
     if CONF_RX_CHECKSUM_2 in config:
         data = config[CONF_RX_CHECKSUM_2]
