@@ -33,12 +33,18 @@ class VentAxiaSentinelKineticComponent : public uart::UARTDevice, public Compone
     void set_down(bool enable);
     void set_set(bool enable);
     void set_main(bool enable);
+  
+    uint8_t buffer[41];
+    bool packet_ready = false;
 
   protected:
     void send_command_(const uint8_t *command_value, int command_value_len, uint8_t command_str);
     void send_alive_str_();
 
     int32_t last_periodic_millis_ = millis();
+    bool validate_crc();
+    void process_packet();
+    uint8_t current_index = 0;
 };
 
 

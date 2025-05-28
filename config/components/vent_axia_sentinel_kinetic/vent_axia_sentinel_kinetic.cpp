@@ -16,11 +16,32 @@ void VentAxiaSentinelKineticComponent::setup() {
 }
 
 void VentAxiaSentinelKineticComponent::loop() {
+  //Send serial packets
   int32_t now = millis();
   if (now - last_periodic_millis_ >= 26){
     last_periodic_millis_ = now;
     if (CMD_KEY_DATA != 0)
       this->send_command_(CMD_KEY_HEADER, 4, CMD_KEY_DATA);
+  }
+
+  //Recieve Serial packets
+  if (this->available() != 0) {
+    uint8_t c;
+    this->read_byte(&c);
+
+    if (current_index == 0 && c != 0x02) {
+      return; // Wait for header
+    }
+    
+    buffer[current_index++] = c;
+    
+    if (current_index == sizeof(buffer)) {
+      if (validate_crc()) {
+        packet_ready = true;
+        process_packet();
+      }
+      current_index = 0;
+    }
   }
 }
 
@@ -58,6 +79,22 @@ void VentAxiaSentinelKineticComponent::send_command_(const uint8_t *command_valu
   //Write CRC
   this->write_byte(lowbyte(crc));
   this->write_byte(highbyte(crc));
+}
+
+bool VentAxiaSentinelKineticComponent::validate_crc() {
+  uint16_t crc = 0xFFFF;
+  for (int i = 0; i < 39; i++) {
+    crc -= buffer[i];
+  }
+  
+  uint16_t received_crc = (buffer[39] << 8) | buffer[40];
+  return (crc == received_crc);
+}
+
+void VentAxiaSentinelKineticComponent::process_packet() {
+  for (uint8_t i = 0; i < 41; i++) {
+    ESP_LOGVV(TAG, "  %u: (0x%02X)", i + 1, buffer[i]);
+  }
 }
 
 void VentAxiaSentinelKineticComponent::set_down(bool enable)  { CMD_KEY_DATA = (CMD_KEY_DATA & ~1) | enable; }
