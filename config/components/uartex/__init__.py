@@ -36,12 +36,8 @@ MULTI_CONF = True
 Checksum = uartex_ns.enum("CHECKSUM")
 CHECKSUMS = {
     "NONE": Checksum.CHECKSUM_NONE,
-    "XOR": Checksum.CHECKSUM_XOR,
     "ADD": Checksum.CHECKSUM_ADD,
     "SUBTRACT": Checksum.CHECKSUM_SUBTRACT,
-    "XOR_NO_HEADER": Checksum.CHECKSUM_XOR_NO_HEADER,
-    "ADD_NO_HEADER": Checksum.CHECKSUM_ADD_NO_HEADER,
-    "XOR_ADD": Checksum.CHECKSUM_XOR_ADD,
 }
 
 def validate_checksum(value):
