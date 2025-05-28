@@ -77,12 +77,6 @@ void UARTExComponent::publish_data()
 #endif
 }
 
-void UARTExComponent::write_flush()
-{
-    this->flush();
-    ESP_LOGV(TAG, "Flush.");
-}
-
 void UARTExComponent::register_device(UARTExDevice *device)
 {
     this->devices_.push_back(device);
@@ -169,30 +163,16 @@ void UARTExComponent::set_rx_checksum_2(CHECKSUM checksum)
 
 std::vector<uint8_t> UARTExComponent::get_rx_checksum(const std::vector<uint8_t> &data, const std::vector<uint8_t> &header)
 {
-    if (this->rx_checksum_f_2_.has_value())
-    {
-        return (*this->rx_checksum_f_2_)(&data[0], data.size());
-    }
-    else
-    {
-        uint16_t crc = get_checksum(this->rx_checksum_2_, header, data);
-        return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
-    }
-    return {};
+    uint16_t crc = get_checksum(header, data);
+    return { (uint8_t)(crc >> 8), (uint8_t)(crc & 0xFF) };
 }
 
-uint16_t UARTExComponent::get_checksum(CHECKSUM checksum, const std::vector<uint8_t> &header, const std::vector<uint8_t> &data)
+uint16_t UARTExComponent::get_checksum(const std::vector<uint8_t> &header, const std::vector<uint8_t> &data)
 {
-    uint16_t crc = 0;
+    uint16_t crc = 0xFFFF;
     uint8_t temp = 0;
-    switch(checksum)
-    {
-    case CHECKSUM_SUBTRACT:
-        crc = 0xFFFF;
-        for (uint8_t byte : header) { crc -= byte; }
-        for (uint8_t byte : data) { crc -= byte; }
-        break;
-    }
+    for (uint8_t byte : header) { crc -= byte; }
+    for (uint8_t byte : data) { crc -= byte; }
     return crc;
 }
 

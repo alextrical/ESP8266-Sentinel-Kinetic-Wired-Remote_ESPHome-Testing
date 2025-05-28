@@ -43,7 +43,6 @@ public:
     void setup() override;
     void loop() override;
     float get_setup_priority() const override { return setup_priority::BUS - 1.0f; }
-    void write_flush();
     void register_device(UARTExDevice *device);
     void write_command(cmd_t cmd);
 
@@ -56,12 +55,11 @@ protected:
     void read_from_uart();
     void publish_to_devices();
     void publish_data();
-    uint16_t get_checksum(CHECKSUM checksum, const std::vector<uint8_t> &header, const std::vector<uint8_t> &data);
+    uint16_t get_checksum(const std::vector<uint8_t> &header, const std::vector<uint8_t> &data);
 
 protected:
     std::vector<UARTExDevice *> devices_{};
     CHECKSUM rx_checksum_2_{CHECKSUM_SUBTRACT};
-    optional<std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)>> rx_checksum_f_2_{};
     CallbackManager<void(const uint8_t *data, const uint16_t len)> read_callback_{};
     ERROR error_code_{ERROR_NONE};
     CallbackManager<void(const ERROR)> error_callback_{};
