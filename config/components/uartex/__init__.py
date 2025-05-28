@@ -7,7 +7,7 @@ from esphome.const import CONF_ID, CONF_OFFSET, CONF_DATA, CONF_TRIGGER_ID, \
     CONF_INVERTED, CONF_VERSION, CONF_NAME, CONF_OPTIMISTIC, CONF_ICON, CONF_ENTITY_CATEGORY, ICON_NEW_BOX
 from esphome.util import SimpleRegistry
 from .const import CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
-    CONF_ACK, CONF_ON_WRITE, CONF_ON_READ, \
+    CONF_ACK, CONF_ON_READ, \
     CONF_STATE, CONF_MASK, \
     CONF_STATE_ON, CONF_STATE_OFF, CONF_COMMAND_ON, CONF_COMMAND_OFF, \
     CONF_COMMAND_UPDATE, \
@@ -178,19 +178,9 @@ async def to_code(config):
             cg.add(var.set_log(sens))
             cg.add(var.set_log_ascii(config[CONF_LOG][CONF_ASCII]))
 
-    for conf in config.get(CONF_ON_WRITE, []):
-        trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
-        await automation.build_automation(trigger, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], conf)
-
     for conf in config.get(CONF_ON_READ, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(trigger, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], conf)
-
-    if CONF_ON_WRITE in config:
-        data = config[CONF_ON_WRITE]
-        if cg.is_template(data):
-            template_ = await cg.templatable(data, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], cg.void)
-            cg.add(var.set_on_write(template_))
             
     if CONF_ON_READ in config:
         data = config[CONF_ON_READ]
