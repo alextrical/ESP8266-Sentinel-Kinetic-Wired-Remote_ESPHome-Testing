@@ -1,5 +1,13 @@
+substitutions:
+  backlight_delay: "10"  # Backlight odd delay in seconds
+
 esphome:
   name: display-test
+  on_boot:
+    then:
+      - binary_sensor.template.publish:
+          id: backlight
+          state: OFF
 
 esp32:
   variant: esp32s3
@@ -9,7 +17,7 @@ esp32:
 
 logger:
   hardware_uart : UART0
-  level: VERBOSE
+  level: VERY_VERBOSE
   logs:
     component: ERROR
 
@@ -18,6 +26,23 @@ uart:
   tx_pin: GPIO1
   rx_pin: GPIO2
   baud_rate: 9600
+
+i2c:
+  sda: 8
+  scl: 9
+  scan: false
+
+display:
+  - platform: lcd_pcf8574
+    id: lcd
+    dimensions: 16x2
+    address: 0x27
+    update_interval: 1000ms
+    lambda: |-
+        //it.printf(0, 0, "%s", id(line1).state.c_str());
+        //it.printf(0, 1, "%s", id(line2).state.c_str());
+        it.printf(0, 0, "%s", "Line1");
+        it.printf(0, 1, "%s", "Line2");
 
 external_components:
   - source: components #Make sure there is a folder named components/vent_axia_sentinel_kinetic at the same location as this YAML
@@ -41,66 +66,83 @@ switch:
 
 binary_sensor:
   - platform: gpio
-    id: bit0
     pin:
       number: 12
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Bit 0 (LSB)"
+    name: "Up"
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
     on_press:
       - switch.turn_on: sw_up
+      - binary_sensor.template.publish:
+          id: backlight
+          state: ON
     on_release:
       - switch.turn_off: sw_up
   - platform: gpio
-    id: bit1
     pin:
       number: 0
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Bit 1"
+      ignore_strapping_warning: true
+    name: "Down"
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
     on_press:
       - switch.turn_on: sw_down
+      - binary_sensor.template.publish:
+          id: backlight
+          state: ON
     on_release:
       - switch.turn_off: sw_down
   - platform: gpio
-    id: bit2
     pin:
       number: 14
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Bit 2"
+    name: "Set"
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
     on_press:
       - switch.turn_on: sw_set
+      - binary_sensor.template.publish:
+          id: backlight
+          state: ON
     on_release:
       - switch.turn_off: sw_set
   - platform: gpio
-    id: bit3
     pin:
       number: 13
       mode:
         input: true
         pullup: true
       inverted: true
-    name: "Bit 3 (MSB)"
+    name: "Main"
     filters:
       - delayed_on: 10ms
       - delayed_off: 10ms
     on_press:
       - switch.turn_on: sw_main
+      - binary_sensor.template.publish:
+          id: backlight
+          state: ON
     on_release:
       - switch.turn_off: sw_main
+  - platform: template
+    id: backlight
+    filters:
+      - delayed_off: ${backlight_delay} s  # delay expects milliseconds
+    on_press:
+      lambda: 'id(lcd).backlight();'
+    on_release:
+      lambda: 'id(lcd).no_backlight();'

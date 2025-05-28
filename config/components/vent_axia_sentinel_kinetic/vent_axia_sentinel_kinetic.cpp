@@ -18,7 +18,6 @@ void VentAxiaSentinelKineticComponent::setup() {
 }
 
 void VentAxiaSentinelKineticComponent::loop() {
-
   int32_t current_millis = millis();
   if (current_millis - last_periodic_millis_ >= 26){
     last_periodic_millis_ = current_millis;
@@ -58,17 +57,12 @@ void VentAxiaSentinelKineticComponent::send_command_(const uint8_t *command_valu
   this->write_byte(command);
   crc -= command;
 
-  // frame end bytes
   //Write CRC
   this->write_byte(lowbyte(crc));
   this->write_byte(highbyte(crc));
-  
-  // FIXME to remove
-  // delay(50);  // NOLINT
 }
 
 void VentAxiaSentinelKineticComponent::set_up(bool enable) {
-  ESP_LOGV(TAG, "UP: %s", enable ? "true" : "false");
   if (enable) {
       CMD_KEY_DATA |= (1 << 1);   // Set bit 1
   } else {
@@ -77,7 +71,6 @@ void VentAxiaSentinelKineticComponent::set_up(bool enable) {
 }
 
 void VentAxiaSentinelKineticComponent::set_down(bool enable) {
-  ESP_LOGV(TAG, "DOWN: %s", enable ? "true" : "false");
   if (enable) {
       CMD_KEY_DATA |= (1);   // Set bit 0
   } else {
@@ -86,7 +79,6 @@ void VentAxiaSentinelKineticComponent::set_down(bool enable) {
 }
 
 void VentAxiaSentinelKineticComponent::set_set(bool enable) {
-  ESP_LOGV(TAG, "SET: %s", enable ? "true" : "false");
   if (enable) {
       CMD_KEY_DATA |= (1 << 2);   // Set bit 2
   } else {
@@ -95,7 +87,6 @@ void VentAxiaSentinelKineticComponent::set_set(bool enable) {
 }
 
 void VentAxiaSentinelKineticComponent::set_main(bool enable) {
-  ESP_LOGV(TAG, "MAIN: %s", enable ? "true" : "false");
   if (enable) {
       CMD_KEY_DATA |= (1 << 3);   // Set bit 3
   } else {
