@@ -6,8 +6,7 @@ from esphome import automation, pins, core
 from esphome.const import CONF_ID, CONF_OFFSET, CONF_DATA, CONF_TRIGGER_ID, \
     CONF_INVERTED, CONF_VERSION, CONF_NAME, CONF_OPTIMISTIC, CONF_ICON, CONF_ENTITY_CATEGORY, ICON_NEW_BOX
 from esphome.util import SimpleRegistry
-from .const import CONF_RX_CHECKSUM_2, \
-    CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
+from .const import CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
     CONF_ACK, CONF_ON_WRITE, CONF_ON_READ, \
     CONF_STATE, CONF_MASK, \
     CONF_STATE_ON, CONF_STATE_OFF, CONF_COMMAND_ON, CONF_COMMAND_OFF, \
@@ -130,7 +129,6 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
             cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ReadTrigger),
         }
     ),
-    cv.Optional(CONF_RX_CHECKSUM_2): validate_checksum,
     cv.Optional(CONF_VERSION): text_sensor.text_sensor_schema(text_sensor.TextSensor).extend(
     {
         cv.Optional(CONF_NAME, default="Version"): cv._validate_entity_name,
@@ -153,7 +151,7 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
         cv.Optional(CONF_DISABLED, default=False): cv.boolean,
         cv.Optional(CONF_ASCII, default=False): cv.boolean,
     }),
-}).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA), cv.has_at_most_one_key(CONF_RX_CHECKSUM_2))
+}).extend(cv.COMPONENT_SCHEMA).extend(uart.UART_DEVICE_SCHEMA))
 
 async def to_code(config):
     cg.add_global(uartex_ns.using)
