@@ -30,7 +30,6 @@ vector_uint8 = cg.std_vector.template(cg.uint8)
 uint16_const = cg.uint16.operator('const')
 uint8_const = cg.uint8.operator('const')
 uint8_ptr_const = uint8_const.operator('ptr')
-WriteTrigger = uartex_ns.class_("WriteTrigger", automation.Trigger.template())
 ReadTrigger = uartex_ns.class_("ReadTrigger", automation.Trigger.template())
 
 MULTI_CONF = True
@@ -135,11 +134,6 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
     cv.Optional(CONF_RX_TIMEOUT, default="10ms"): cv.All(
         cv.positive_time_period_milliseconds,
         cv.Range(max=core.TimePeriod(milliseconds=2000)),
-    ),
-    cv.Optional(CONF_ON_WRITE): automation.validate_automation(
-        {
-            cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(WriteTrigger),
-        }
     ),
     cv.Optional(CONF_ON_READ): automation.validate_automation(
         {

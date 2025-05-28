@@ -6,18 +6,6 @@
 namespace esphome {
 namespace uartex {
 
-class WriteTrigger : public Trigger<const uint8_t*, const uint16_t>
-{
-public:
-    explicit WriteTrigger(UARTExComponent *parent)
-    {
-        parent->add_on_write_callback([this](const uint8_t *data, const uint16_t len)
-        {
-            this->trigger(data, len);
-        });
-    }
-};
-
 class ReadTrigger : public Trigger<const uint8_t*, const uint16_t>
 {
 public:
