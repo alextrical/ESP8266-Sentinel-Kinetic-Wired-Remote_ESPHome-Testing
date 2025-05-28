@@ -1,165 +1,46 @@
 #pragma once
-#include "esphome/core/defines.h"
+
 #include "esphome/core/component.h"
-#ifdef USE_BINARY_SENSOR
-#include "esphome/components/binary_sensor/binary_sensor.h"
-#endif
-#ifdef USE_SENSOR
-#include "esphome/components/sensor/sensor.h"
-#endif
-#ifdef USE_NUMBER
-#include "esphome/components/number/number.h"
-#endif
+#include "esphome/components/uart/uart.h"
+
 #ifdef USE_SWITCH
 #include "esphome/components/switch/switch.h"
 #endif
-#ifdef USE_BUTTON
-#include "esphome/components/button/button.h"
-#endif
-#ifdef USE_SELECT
-#include "esphome/components/select/select.h"
-#endif
-#ifdef USE_TEXT_SENSOR
-#include "esphome/components/text_sensor/text_sensor.h"
-#endif
-#include "esphome/components/uart/uart.h"
-#include "esphome/core/automation.h"
-#include "esphome/core/helpers.h"
-
-#include <map>
 
 namespace esphome {
 namespace vent_axia_sentinel_kinetic {
 
-#define CHECK_BIT(var, pos) (((var) >> (pos)) & 1)
-
 // Commands
-static const uint16_t CMD_ENABLE_CONF = 0x00FF;
-static const uint16_t CMD_DISABLE_CONF = 0x00FE;
-static const uint16_t CMD_ENABLE_ENG = 0x0062;
-static const uint16_t CMD_MAXDIST_DURATION = 0x0060;
-static const uint16_t CMD_QUERY = 0x0061;
-static const uint16_t CMD_GATE_SENS = 0x0064;
-static const uint16_t CMD_VERSION = 0x1234;
-static const uint16_t CMD_QUERY_DISTANCE_RESOLUTION = 0x00AB;
-static const uint16_t CMD_SET_DISTANCE_RESOLUTION = 0x00AA;
-static const uint16_t CMD_QUERY_LIGHT_CONTROL = 0x00AE;
-static const uint16_t CMD_SET_LIGHT_CONTROL = 0x00AD;
-static const uint16_t CMD_BT_PASSWORD = 0x00A9;
-static const uint16_t CMD_RESET = 0x00A2;
+static const uint8_t CMD_FRAME_HEADER = 0x04;
+static const uint8_t CMD_ALIVE_HEADER[4] = {0x06, 0xFF, 0xFF, 0xFF};
+static const uint8_t CMD_KEY_HEADER[4] = {0x05, 0xAF, 0xEF, 0xFB};
+static const uint8_t CMD_ALIVE_DATA = 0x10;
+static uint8_t CMD_KEY_DATA = 0x00;
 
-enum DistanceResolutionStructure : uint8_t { DISTANCE_RESOLUTION_0_2 = 0x01, DISTANCE_RESOLUTION_0_75 = 0x00 };
-
-static const std::map<std::string, uint8_t> DISTANCE_RESOLUTION_ENUM_TO_INT{{"0.2m", DISTANCE_RESOLUTION_0_2},
-                                                                            {"0.75m", DISTANCE_RESOLUTION_0_75}};
-static const std::map<uint8_t, std::string> DISTANCE_RESOLUTION_INT_TO_ENUM{{DISTANCE_RESOLUTION_0_2, "0.2m"},
-                                                                            {DISTANCE_RESOLUTION_0_75, "0.75m"}};
-// Commands values
-// static const uint16_t CMD_MAX_MOVE_VALUE = 0x0000;
-// static const uint16_t CMD_MAX_STILL_VALUE = 0x0001;
-// static const uint16_t CMD_DURATION_VALUE = 0x0002;
-// Command Header & Footer
-// static const uint8_t CMD_FRAME_HEADER[4] = {0xFD, 0xFC, 0xFB, 0xFA};
-// static const uint8_t CMD_FRAME_END[4] = {0x04, 0x03, 0x02, 0x01};
-static const uint8_t CMD_FRAME_HEADER[5] = {0x04, 0x05, 0xAF, 0xEF, 0xFB};
-static const uint8_t CMD_FRAME_END[2] = {0x00, 0x00};
-// Data Header & Footer
-// static const uint8_t DATA_FRAME_HEADER[4] = {0xF4, 0xF3, 0xF2, 0xF1};
-// static const uint8_t DATA_FRAME_END[4] = {0xF8, 0xF7, 0xF6, 0xF5};
-/*
-Data Type: 6th byte
-Target states: 9th byte
-    Moving target distance: 10~11th bytes
-    Moving target energy: 12th byte
-    Still target distance: 13~14th bytes
-    Still target energy: 15th byte
-    Detect distance: 16~17th bytes
-*/
-enum PeriodicDataStructure : uint8_t {
-  DATA_TYPES = 6,
-  TARGET_STATES = 8,
-  MOVING_TARGET_LOW = 9,
-  MOVING_TARGET_HIGH = 10,
-  STILL_TARGET_LOW = 12,
-  STILL_TARGET_HIGH = 13,
-  DETECT_DISTANCE_LOW = 15,
-  DETECT_DISTANCE_HIGH = 16,
-  MOVING_SENSOR_START = 19,
-  STILL_SENSOR_START = 28,
-  LIGHT_SENSOR = 37,
-  OUT_PIN_SENSOR = 38,
-};
-enum PeriodicDataValue : uint8_t { HEAD = 0xAA, END = 0x55, CHECK = 0x00 };
-
-enum AckDataStructure : uint8_t { COMMAND = 6, COMMAND_STATUS = 7 };
-
-//  char cmd[2] = {enable ? 0xFF : 0xFE, 0x00};
-class VentAxiaSentinelKineticComponent : public Component, public uart::UARTDevice {
-#ifdef USE_SENSOR
-  SUB_SENSOR(light)
-#endif
-#ifdef USE_BINARY_SENSOR
-  SUB_BINARY_SENSOR(target)
-#endif
-#ifdef USE_TEXT_SENSOR
-  SUB_TEXT_SENSOR(version)
-#endif
-#ifdef USE_SELECT
-  SUB_SELECT(distance_resolution)
-#endif
+class VentAxiaSentinelKineticComponent : public uart::UARTDevice, public Component {
 #ifdef USE_SWITCH
   SUB_SWITCH(up)
   SUB_SWITCH(down)
   SUB_SWITCH(set)
   SUB_SWITCH(main)
 #endif
-#ifdef USE_BUTTON
-  SUB_BUTTON(up)
-  SUB_BUTTON(down)
-  SUB_BUTTON(set)
-  SUB_BUTTON(main)
-#endif
-#ifdef USE_NUMBER
-  SUB_NUMBER(timeout)
-#endif
 
- public:
-  VentAxiaSentinelKineticComponent();
-  void setup() override;
-  void dump_config() override;
-  void loop() override;
-#ifdef USE_NUMBER
-  void set_max_distances_timeout();
-  void set_gate_threshold(uint8_t gate);
-#endif
-#ifdef USE_SENSOR
-  void set_gate_move_sensor(int gate, sensor::Sensor *s);
-  void set_gate_still_sensor(int gate, sensor::Sensor *s);
-#endif
-  void set_throttle(uint16_t value) { this->throttle_ = value; };
-  void read_all_info();
-  void set_up(bool enable);
-  void set_down(bool enable);
-  void set_set(bool enable);
-  void set_main(bool enable);
-  void set_distance_resolution(const std::string &state);
+  public:
+    void setup() override;
+    void loop() override;
+    void dump_config() override;
+    void set_up(bool enable);
+    void set_down(bool enable);
+    void set_set(bool enable);
+    void set_main(bool enable);
 
- protected:
-  int two_byte_to_int_(char firstbyte, char secondbyte) { return (int16_t) (secondbyte << 8) + firstbyte; }
-  void send_command_(uint16_t command_str, const uint8_t *command_value, int command_value_len);
-  void set_config_mode_(bool enable);
-  void handle_periodic_data_(uint8_t *buffer, int len);
-  bool handle_ack_data_(uint8_t *buffer, int len);
-  void readline_(int readch, uint8_t *buffer, int len);
-  void query_parameters_();
-  void get_version_();
-  void get_distance_resolution_();
-  void get_light_control_();
+  protected:
+    void send_command_(const uint8_t *command_value, int command_value_len, uint8_t command_str);
+    void send_alive_str_();
 
-  int32_t last_periodic_millis_ = millis();
-  uint16_t throttle_;
-  std::string version_;
+    int32_t last_periodic_millis_ = millis();
 };
+
 
 }  // namespace vent_axia_sentinel_kinetic
 }  // namespace esphome

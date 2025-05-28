@@ -9,7 +9,7 @@ esp32:
 
 logger:
   hardware_uart : UART0
-  level: DEBUG
+  level: VERBOSE
   logs:
     component: ERROR
 
@@ -23,53 +23,84 @@ external_components:
   - source: components #Make sure there is a folder named components/vent_axia_sentinel_kinetic at the same location as this YAML
 
 vent_axia_sentinel_kinetic:
-  # id: vent_axia_sentinel_kinetic
-
-binary_sensor:
-  - platform: vent_axia_sentinel_kinetic
-    has_target:
-      name: Presence
-
-sensor:
-  - platform: vent_axia_sentinel_kinetic
-    light:
-      name: light
 
 switch:
   - platform: vent_axia_sentinel_kinetic
     up:
-      name: "control up"
+      name: "Up Switch"
+      id: sw_up
     down:
-      name: "control down"
+      name: "Down Switch"
+      id: sw_down
     set:
-      name: "control set"
+      name: "Set Switch"
+      id: sw_set
     main:
-      name: "control main"
+      name: "Main Switch"
+      id: sw_main
 
-number:
-  - platform: vent_axia_sentinel_kinetic
-    timeout:
-      name: timeout
-
-button:
-  - platform: vent_axia_sentinel_kinetic
-    up:
-      name: "Up Button"
-    down:
-      name: "Down Button"
-    set:
-      name: "Set Button"
-    main:
-      name: "Main Button"
-    # factory_reset:
-    #   name: "factory reset"
-
-text_sensor:
-  - platform: vent_axia_sentinel_kinetic
-    version:
-      name: "firmware version"
-
-select:
-  - platform: vent_axia_sentinel_kinetic
-    distance_resolution:
-      name: "distance resolution"
+binary_sensor:
+  - platform: gpio
+    id: bit0
+    pin:
+      number: 12
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Bit 0 (LSB)"
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - switch.turn_on: sw_up
+    on_release:
+      - switch.turn_off: sw_up
+  - platform: gpio
+    id: bit1
+    pin:
+      number: 0
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Bit 1"
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - switch.turn_on: sw_down
+    on_release:
+      - switch.turn_off: sw_down
+  - platform: gpio
+    id: bit2
+    pin:
+      number: 14
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Bit 2"
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - switch.turn_on: sw_set
+    on_release:
+      - switch.turn_off: sw_set
+  - platform: gpio
+    id: bit3
+    pin:
+      number: 13
+      mode:
+        input: true
+        pullup: true
+      inverted: true
+    name: "Bit 3 (MSB)"
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+    on_press:
+      - switch.turn_on: sw_main
+    on_release:
+      - switch.turn_off: sw_main
