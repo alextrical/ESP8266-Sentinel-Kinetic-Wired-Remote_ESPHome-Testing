@@ -6,8 +6,7 @@ from esphome import automation, pins, core
 from esphome.const import CONF_ID, CONF_OFFSET, CONF_DATA, CONF_TRIGGER_ID, \
     CONF_INVERTED, CONF_VERSION, CONF_NAME, CONF_OPTIMISTIC, CONF_ICON, CONF_ENTITY_CATEGORY, ICON_NEW_BOX
 from esphome.util import SimpleRegistry
-from .const import CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
-    CONF_ACK, CONF_ON_READ, \
+from .const import CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, CONF_ON_READ, \
     CONF_STATE, CONF_MASK, \
     CONF_STATE_ON, CONF_STATE_OFF, CONF_COMMAND_ON, CONF_COMMAND_OFF, \
     CONF_COMMAND_UPDATE, \
@@ -108,13 +107,12 @@ def header_schema(value):
 
 COMMAND_SCHEMA = cv.Schema({
     cv.Required(CONF_DATA): validate_hex_data,
-    cv.Optional(CONF_ACK, default=[]): validate_hex_data,
     cv.Optional(CONF_MASK, default=[]): validate_hex_data
 })
 
 def shorthand_command_hex(value):
     value = validate_hex_data(value)
-    return COMMAND_SCHEMA({CONF_DATA: value, CONF_ACK: [], CONF_MASK: []})
+    return COMMAND_SCHEMA({CONF_DATA: value, CONF_MASK: []})
 
 def command_hex_schema(value):
     if isinstance(value, dict):
@@ -291,7 +289,6 @@ def command_hex_expression(conf):
     if conf is None:
         return
     data = conf[CONF_DATA]
-    ack = conf[CONF_ACK]
     mask = conf[CONF_MASK]
     return cmd_t(data, ack, mask)
 
@@ -316,7 +313,6 @@ async def command_string_expression(conf):
 @automation.register_action('uartex.write', UARTExWriteAction, cv.maybe_simple_value({
     cv.GenerateID(): cv.use_id(UARTExComponent),
     cv.Required(CONF_DATA): cv.templatable(validate_hex_data),
-    cv.Optional(CONF_ACK, default=[]): validate_hex_data,
     cv.Optional(CONF_MASK, default=[]): validate_hex_data
 }, key=CONF_DATA))
 
