@@ -8,8 +8,6 @@ void UARTExComponent::dump_config()
 #ifdef ESPHOME_LOG_HAS_DEBUG
     log_config(TAG, "rx_timeout", this->conf_rx_timeout_);
     log_config(TAG, "rx_length", this->conf_rx_length_);
-    if (this->rx_header_.has_value()) log_config(TAG, "rx_header", this->rx_header_.value().data);
-    if (this->rx_header_.has_value()) log_config(TAG, "rx_header mask", this->rx_header_.value().mask);
     if (this->rx_footer_.has_value()) log_config(TAG, "rx_footer", this->rx_footer_.value());
     log_config(TAG, "rx_checksum2", (uint16_t)this->rx_checksum_2_);
     log_config(TAG, "uartex count", (uint16_t)this->devices_.size());
@@ -115,10 +113,6 @@ ERROR UARTExComponent::validate_data()
     {
         return ERROR_SIZE;
     }
-    if (this->rx_header_.has_value() && this->rx_parser_.parse_header() == false)
-    {
-        return ERROR_HEADER;
-    }
     if (this->rx_footer_.has_value() && this->rx_parser_.parse_footer() == false)
     {
         return ERROR_FOOTER;
@@ -196,11 +190,6 @@ void UARTExComponent::publish_log(std::string msg)
         this->last_log_ = msg;
         this->log_->publish_state(msg);
     }
-}
-
-void UARTExComponent::set_rx_header(header_t header)
-{
-    this->rx_header_ = header;
 }
 
 void UARTExComponent::set_rx_footer(std::vector<uint8_t> footer)

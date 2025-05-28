@@ -6,7 +6,7 @@ from esphome import automation, pins, core
 from esphome.const import CONF_ID, CONF_OFFSET, CONF_DATA, CONF_TRIGGER_ID, \
     CONF_INVERTED, CONF_VERSION, CONF_NAME, CONF_OPTIMISTIC, CONF_ICON, CONF_ENTITY_CATEGORY, ICON_NEW_BOX
 from esphome.util import SimpleRegistry
-from .const import CONF_RX_HEADER, CONF_RX_FOOTER, \
+from .const import CONF_RX_FOOTER, \
     CONF_RX_CHECKSUM_2, \
     CONF_UARTEX_ID, CONF_ERROR, CONF_LOG, \
     CONF_ACK, CONF_ON_WRITE, CONF_ON_READ, \
@@ -142,7 +142,6 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
         }
     ),
     cv.Optional(CONF_RX_LENGTH): cv.int_range(min=1, max=256),
-    cv.Optional(CONF_RX_HEADER): header_schema,
     cv.Optional(CONF_RX_FOOTER): validate_hex_data,
     cv.Optional(CONF_RX_CHECKSUM_2): validate_checksum,
     cv.Optional(CONF_VERSION): text_sensor.text_sensor_schema(text_sensor.TextSensor).extend(
@@ -207,10 +206,6 @@ async def to_code(config):
 
     if CONF_RX_LENGTH in config:
         cg.add(var.set_rx_length(config[CONF_RX_LENGTH]))
-
-    if CONF_RX_HEADER in config:
-        header = header_hex_expression(config[CONF_RX_HEADER])
-        cg.add(var.set_rx_header(header))
 
     if CONF_RX_FOOTER in config:
         cg.add(var.set_rx_footer(config[CONF_RX_FOOTER]))
