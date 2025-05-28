@@ -7,7 +7,6 @@ void UARTExComponent::dump_config()
 {
 #ifdef ESPHOME_LOG_HAS_DEBUG
     log_config(TAG, "rx_timeout", this->conf_rx_timeout_);
-    log_config(TAG, "rx_length", this->conf_rx_length_);
     log_config(TAG, "rx_checksum2", (uint16_t)this->rx_checksum_2_);
     log_config(TAG, "uartex count", (uint16_t)this->devices_.size());
 #endif
@@ -18,7 +17,7 @@ void UARTExComponent::setup()
     this->rx_parser_.set_checksum_len(2);
     this->rx_time_ = get_time();
     this->rx_parser_.add_headers(std::vector<unsigned char>{0x02});
-    this->rx_parser_.set_total_len(this->conf_rx_length_);
+    this->rx_parser_.set_total_len(41);
     if (this->error_) this->error_->publish_state("None");
     if (this->version_) this->version_->publish_state(UARTEX_VERSION);
     ESP_LOGI(TAG, "Initaialize.");
@@ -90,11 +89,6 @@ void UARTExComponent::register_device(UARTExDevice *device)
     this->devices_.push_back(device);
 }
 
-void UARTExComponent::set_rx_length(uint16_t rx_length)
-{
-    this->conf_rx_length_ = rx_length;
-}
-
 void UARTExComponent::set_rx_timeout(uint16_t timeout)
 {
     this->conf_rx_timeout_ = timeout;
@@ -104,10 +98,6 @@ ERROR UARTExComponent::validate_data()
 {
     auto data = this->rx_parser_.data();
     if (data.empty())
-    {
-        return ERROR_SIZE;
-    }
-    if (this->conf_rx_length_ > 0 && this->conf_rx_length_ != this->rx_parser_.buffer().size())
     {
         return ERROR_SIZE;
     }

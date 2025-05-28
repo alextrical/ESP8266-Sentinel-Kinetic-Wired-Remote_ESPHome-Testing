@@ -45,7 +45,6 @@ public:
     float get_setup_priority() const override { return setup_priority::BUS - 1.0f; }
     void write_flush();
     void register_device(UARTExDevice *device);
-    void set_rx_length(uint16_t rx_length);
     void set_rx_timeout(uint16_t timeout);
     void write_command(cmd_t cmd);
 
@@ -63,7 +62,6 @@ protected:
 protected:
     std::vector<UARTExDevice *> devices_{};
     uint16_t conf_rx_timeout_{10};
-    uint16_t conf_rx_length_{0};
     CHECKSUM rx_checksum_2_{CHECKSUM_SUBTRACT};
     optional<std::function<std::vector<uint8_t>(const uint8_t *data, const uint16_t len)>> rx_checksum_f_2_{};
     CallbackManager<void(const uint8_t *data, const uint16_t len)> read_callback_{};

@@ -12,7 +12,7 @@ from .const import CONF_RX_CHECKSUM_2, \
     CONF_STATE, CONF_MASK, \
     CONF_STATE_ON, CONF_STATE_OFF, CONF_COMMAND_ON, CONF_COMMAND_OFF, \
     CONF_COMMAND_UPDATE, CONF_RX_TIMEOUT, \
-    CONF_STATE_RESPONSE, CONF_LENGTH, CONF_PRECISION, CONF_RX_LENGTH, \
+    CONF_STATE_RESPONSE, CONF_LENGTH, CONF_PRECISION, \
     CONF_DISABLED, CONF_ASCII, CONF_SIGNED, CONF_ENDIAN, CONF_DECODE
 
 AUTO_LOAD = ["text_sensor"]
@@ -134,7 +134,6 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
             cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ReadTrigger),
         }
     ),
-    cv.Optional(CONF_RX_LENGTH, default="41"): cv.int_range(min=1, max=256),
     cv.Optional(CONF_RX_CHECKSUM_2): validate_checksum,
     cv.Optional(CONF_VERSION): text_sensor.text_sensor_schema(text_sensor.TextSensor).extend(
     {
@@ -195,9 +194,6 @@ async def to_code(config):
     for conf in config.get(CONF_ON_READ, []):
         trigger = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var)
         await automation.build_automation(trigger, [(uint8_ptr_const, 'data'), (uint16_const, 'len')], conf)
-
-    if CONF_RX_LENGTH in config:
-        cg.add(var.set_rx_length(config[CONF_RX_LENGTH]))
 
     if CONF_RX_CHECKSUM_2 in config:
         data = config[CONF_RX_CHECKSUM_2]
