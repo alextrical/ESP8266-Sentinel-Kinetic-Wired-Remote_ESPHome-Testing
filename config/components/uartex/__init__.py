@@ -134,7 +134,7 @@ CONFIG_SCHEMA = cv.All(cv.Schema({
             cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(ReadTrigger),
         }
     ),
-    cv.Optional(CONF_RX_LENGTH): cv.int_range(min=1, max=256),
+    cv.Optional(CONF_RX_LENGTH, default="41"): cv.int_range(min=1, max=256),
     cv.Optional(CONF_RX_CHECKSUM_2): validate_checksum,
     cv.Optional(CONF_VERSION): text_sensor.text_sensor_schema(text_sensor.TextSensor).extend(
     {
