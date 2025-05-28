@@ -60,37 +60,10 @@ void VentAxiaSentinelKineticComponent::send_command_(const uint8_t *command_valu
   this->write_byte(highbyte(crc));
 }
 
-void VentAxiaSentinelKineticComponent::set_up(bool enable) {
-  if (enable) {
-      CMD_KEY_DATA |= (1 << 1);   // Set bit 1
-  } else {
-      CMD_KEY_DATA &= ~(1 << 1);  // Clear bit 1
-  }
-}
-
-void VentAxiaSentinelKineticComponent::set_down(bool enable) {
-  if (enable) {
-      CMD_KEY_DATA |= (1);   // Set bit 0
-  } else {
-      CMD_KEY_DATA &= ~(1);  // Clear bit 0
-  }
-}
-
-void VentAxiaSentinelKineticComponent::set_set(bool enable) {
-  if (enable) {
-      CMD_KEY_DATA |= (1 << 2);   // Set bit 2
-  } else {
-      CMD_KEY_DATA &= ~(1 << 2);  // Clear bit 2
-  }
-}
-
-void VentAxiaSentinelKineticComponent::set_main(bool enable) {
-  if (enable) {
-      CMD_KEY_DATA |= (1 << 3);   // Set bit 3
-  } else {
-      CMD_KEY_DATA &= ~(1 << 3);  // Clear bit 3
-  }
-}
+void VentAxiaSentinelKineticComponent::set_down(bool enable)  { CMD_KEY_DATA = (CMD_KEY_DATA & ~1) | enable; }
+void VentAxiaSentinelKineticComponent::set_up(bool enable)    { CMD_KEY_DATA = (CMD_KEY_DATA & ~(1<<1)) | (enable << 1); }
+void VentAxiaSentinelKineticComponent::set_set(bool enable)   { CMD_KEY_DATA = (CMD_KEY_DATA & ~(1<<2)) | (enable << 2); }
+void VentAxiaSentinelKineticComponent::set_main(bool enable)  { CMD_KEY_DATA = (CMD_KEY_DATA & ~(1<<3)) | (enable << 3); }
 
 }  // namespace vent_axia_sentinel_kinetic
 }  // namespace esphome

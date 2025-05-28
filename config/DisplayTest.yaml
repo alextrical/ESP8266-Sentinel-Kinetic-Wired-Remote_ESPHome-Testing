@@ -17,7 +17,7 @@ esp32:
 
 logger:
   hardware_uart : UART0
-  level: VERY_VERBOSE
+  level: DEBUG
   logs:
     component: ERROR
 
@@ -37,7 +37,7 @@ display:
     id: lcd
     dimensions: 16x2
     address: 0x27
-    update_interval: 1000ms
+    update_interval: 100s
     lambda: |-
         //it.printf(0, 0, "%s", id(line1).state.c_str());
         //it.printf(0, 1, "%s", id(line2).state.c_str());
@@ -48,14 +48,6 @@ external_components:
   - source: components #Make sure there is a folder named components/vent_axia_sentinel_kinetic at the same location as this YAML
 
 vent_axia_sentinel_kinetic:
-# uartex:
-
-# text_sensor:
-#   # Raw string from UART (read once)
-#   - platform: uartex
-#     name: LCD_RAW
-#     id: "lcd_raw"
-#     lambda: 'return std::string(reinterpret_cast<const char*>(data + 5), 33);'
 
 switch:
   - platform: vent_axia_sentinel_kinetic
