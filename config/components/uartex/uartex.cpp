@@ -6,7 +6,6 @@ static const char *TAG = "uartex";
 void UARTExComponent::dump_config()
 {
 #ifdef ESPHOME_LOG_HAS_DEBUG
-    log_config(TAG, "rx_checksum2", (uint16_t)this->rx_checksum_2_);
     log_config(TAG, "uartex count", (uint16_t)this->devices_.size());
 #endif
 }
