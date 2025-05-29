@@ -1,8 +1,8 @@
 ```yaml
 # example configuration:
 
-ventaxiask_uart:
-  id: ventaxiask_uart_1
+vent_axia_sentinel_kinetic:
+  id: vent_axia_sentinel_kinetic_1
 
 uart:
   tx_pin: D0

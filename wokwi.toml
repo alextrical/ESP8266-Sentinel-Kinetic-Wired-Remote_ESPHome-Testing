@@ -1,4 +1,4 @@
 [wokwi]
 version = 1
-firmware = 'config/.esphome/build/display-test/.pioenvs/display-test/firmware.factory.bin'
-elf = 'config/.pioenvs/display-test/firmware.elf'
+firmware = 'config/.esphome/build/vent-axia-sentinel-kinetic/.pioenvs/vent-axia-sentinel-kinetic/firmware.factory.bin'
+elf = 'config/.pioenvs/vent-axia-sentinel-kinetic/firmware.elf'

@@ -1,0 +1,27 @@
+
+
+esp32:
+  variant: esp32s3
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+logger:
+  hardware_uart : UART0
+  level: DEBUG
+  # logs:
+  #   component: ERROR
+
+i2c:
+  sda: 8
+  scl: 9
+  scan: false
+
+uart:
+  tx_pin: 1
+  rx_pin: 2
+  baud_rate: 9600
+  id: demo_uart
+
+packages:
+  common: !include common.yaml

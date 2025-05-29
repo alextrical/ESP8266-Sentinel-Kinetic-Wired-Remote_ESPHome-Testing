@@ -35,14 +35,21 @@ Create/activate environment by running from project root:
 source scripts/setup_build_env.sh
 ```
 
-Build firmware on your local machine:
+To Build ESP32 firmware on your local machine for running Wokwi:
 ```bash
-esphome compile config/DisplayTest.yaml
+esphome compile config/VASK-ESP32.yaml
+```
+Once copiled run in Wokwi VSCode https://marketplace.visualstudio.com/items?itemName=wokwi.wokwi-vscode
+
+
+To Build ESP8266 firmware on your local machine:
+```bash
+esphome compile config/VASK-ESP8266.yaml
 ```
 
 Upload firmware to your Board:
 ```bash
-esphome upload config/DisplayTest.yaml
+esphome upload config/VASK-ESP8266.yaml
 ```
 
 Connect the device to your wifi network:
@@ -54,5 +61,5 @@ Tail the Board's Logs:
 1. Go to: [web.esphome.io](https://web.esphome.io) and connect then click logs... or
 2. Tail the ESPHome logs of the Board's running firmware from the command line:
 ```bash
-esphome logs config/DisplayTest.yaml
+esphome logs config/VASK-ESP8266.yaml
 ```
