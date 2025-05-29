@@ -46,7 +46,11 @@ void VentAxiaSentinelKineticComponent::loop() {
 }
 
 void VentAxiaSentinelKineticComponent::dump_config(){
+  this->check_uart_settings(9600, 1, esphome::uart::UART_CONFIG_PARITY_NONE, 8);
   ESP_LOGCONFIG(TAG, "VentAxiaSentinelKinetic:");
+  if (this->is_failed()) {
+    ESP_LOGE(TAG, "Connection with VentAxiaSentinelKinetic failed!");
+  }
 #ifdef USE_SWITCH
   LOG_SWITCH("  ", "UpSwitch", this->up_switch_);
   LOG_SWITCH("  ", "DownSwitch", this->down_switch_);
