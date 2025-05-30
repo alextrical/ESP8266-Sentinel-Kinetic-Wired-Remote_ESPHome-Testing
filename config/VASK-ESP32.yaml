@@ -25,3 +25,4 @@ uart:
 
 packages:
   common: !include common.yaml
+  debug: !include debug.yaml

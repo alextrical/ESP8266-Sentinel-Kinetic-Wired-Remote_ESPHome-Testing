@@ -83,8 +83,8 @@ void VentAxiaSentinelKineticComponent::send_command_(const uint8_t *command_valu
   crc -= command;
 
   //Write CRC
-  this->write_byte(lowbyte(crc));
   this->write_byte(highbyte(crc));
+  this->write_byte(lowbyte(crc));
 }
 
 bool VentAxiaSentinelKineticComponent::validate_crc() {
