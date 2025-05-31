@@ -17,11 +17,18 @@ void VentAxiaSentinelKineticComponent::setup() {
 
 void VentAxiaSentinelKineticComponent::loop() {
   //Send serial packets
-  int32_t now = millis();
-  if (now - last_periodic_millis_ >= 26){
-    last_periodic_millis_ = now;
-    if (CMD_KEY_DATA != 0)
-      this->send_command_(CMD_KEY_HEADER, 4, CMD_KEY_DATA);
+  if (CMD_KEY_DATA != 0) {
+    if (CMD_KEY_DATA != LAST_CMD_KEY_DATA_){
+    this->calculate_command_(CMD_KEY_HEADER, CMD_KEY_DATA);
+    LAST_CMD_KEY_DATA_ = CMD_KEY_DATA;
+    }
+
+    //Send serial packets
+    int32_t now = millis();
+    if (now - last_periodic_millis_ >= 26){
+      last_periodic_millis_ = now;
+      send_command_();
+    }
   }
 
   //Recieve Serial packets
@@ -29,18 +36,18 @@ void VentAxiaSentinelKineticComponent::loop() {
     uint8_t c;
     this->read_byte(&c);
 
-    if (current_index == 0 && c != 0x02) {
+    if (current_index_ == 0 && c != 0x02) {
       return; // Wait for header
     }
     
-    buffer[current_index++] = c;
+    buffer[current_index_++] = c;
     
-    if (current_index == sizeof(buffer)) {
-      if (validate_crc()) {
+    if (current_index_ == sizeof(buffer)) {
+      if (validate_crc_()) {
         packet_ready = true;
-        process_packet();
+        process_packet_();
       }
-      current_index = 0;
+      current_index_ = 0;
     }
   }
 }
@@ -61,33 +68,38 @@ void VentAxiaSentinelKineticComponent::dump_config(){
 #endif
 }
 
-void VentAxiaSentinelKineticComponent::send_alive_str_() { this->send_command_(CMD_ALIVE_HEADER, 4, CMD_ALIVE_DATA); }
+void VentAxiaSentinelKineticComponent::send_alive_str_() { this->calculate_command_(CMD_ALIVE_HEADER, CMD_ALIVE_DATA); }
 
-void VentAxiaSentinelKineticComponent::send_command_(const uint8_t *command_value, int command_value_len, uint8_t command) {
-  ESP_LOGV(TAG, "Sending COMMAND %02X", command);
-
-  // frame start bytes
-  this->write_byte(CMD_FRAME_HEADER);
-  uint16_t crc = 0xFFFF - CMD_FRAME_HEADER;
-
+void VentAxiaSentinelKineticComponent::calculate_command_(const uint8_t *command_value, uint8_t command) {
+  cmdbuffer_[0] = CMD_FRAME_HEADER;
   // command value bytes
   if (command_value != nullptr) {
-    for (int i = 0; i < command_value_len; i++) {
-      this->write_byte(command_value[i]);
-      crc -= command_value[i];
+    for (int i = 0; i < 4; i++) {
+      cmdbuffer_[i+1] = command_value[i];
     }
   }
+  cmdbuffer_[5] = command;
 
-  // command
-  this->write_byte(command);
-  crc -= command;
-
-  //Write CRC
-  this->write_byte(highbyte(crc));
-  this->write_byte(lowbyte(crc));
+  uint16_t crc = 0xFFFF;
+  for (uint32_t i = 0; i < 6; i++) {
+    crc -= cmdbuffer_[i];
+  }
+  cmdbuffer_[6] = highbyte(crc);
+  cmdbuffer_[7] = lowbyte(crc);
+  send_command_();
 }
 
-bool VentAxiaSentinelKineticComponent::validate_crc() {
+void VentAxiaSentinelKineticComponent::send_command_(){
+  // command value bytes
+  for (int i = 0; i < 8; i++) {
+    ESP_LOGV(TAG, "Sending COMMAND %02X", cmdbuffer_[i]);
+    this->write_byte(cmdbuffer_[i]);
+  }
+  // this->write_array(command, 8);
+  // this->write_array(command[i]);
+}
+
+bool VentAxiaSentinelKineticComponent::validate_crc_() {
   uint16_t crc = 0xFFFF;
   for (int i = 0; i < 39; i++) {
     crc -= buffer[i];
@@ -103,7 +115,7 @@ void VentAxiaSentinelKineticComponent::set_set(bool enable)   { CMD_KEY_DATA = (
 void VentAxiaSentinelKineticComponent::set_main(bool enable)  { CMD_KEY_DATA = (CMD_KEY_DATA & ~(1<<3)) | (enable << 3); }
 
 
-void VentAxiaSentinelKineticComponent::process_packet() {
+void VentAxiaSentinelKineticComponent::process_packet_() {
   // for (uint8_t i = 0; i < 41; i++) {
   //   ESP_LOGVV(TAG, "  %u: (0x%02X)", i + 1, buffer[i]);
   // }

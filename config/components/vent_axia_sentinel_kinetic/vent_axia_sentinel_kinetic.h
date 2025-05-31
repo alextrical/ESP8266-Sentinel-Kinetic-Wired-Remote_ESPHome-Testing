@@ -103,13 +103,16 @@ class VentAxiaSentinelKineticComponent : public uart::UARTDevice, public Compone
     text_sensor::TextSensor *diagnostic26_{nullptr};
     text_sensor::TextSensor *diagnostic27_{nullptr};
     text_sensor::TextSensor *diagnostic28_{nullptr};
-    void send_command_(const uint8_t *command_value, int command_value_len, uint8_t command_str);
+    void calculate_command_(const uint8_t *command_value, uint8_t command_str);
     void send_alive_str_();
 
+    void send_command_();
     int32_t last_periodic_millis_ = millis();
-    bool validate_crc();
-    void process_packet();
-    uint8_t current_index = 0;
+    bool validate_crc_();
+    void process_packet_();
+    uint8_t current_index_ = 0;
+    uint8_t cmdbuffer_[8];
+    uint8_t LAST_CMD_KEY_DATA_ = 0x00;
 };
 
 
